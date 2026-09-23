@@ -1,0 +1,819 @@
+{
+  "name": "customer support agent",
+  "nodes": [
+    {
+      "parameters": {
+        "text": "={{ $json.snippet }}\n\n{{ $json.Subject }}\n\nYou are an AI assistant helping customer support agents. Analyze the following customer message and return only the fields requested below.\n\nDo **not guess** or fabricate values. Only return an order number if it's clearly mentioned. If it's missing, leave the field blank or null.\n\n---\n\nPlease extract:\n\n1. **Order Number** – If a clear numeric order number is mentioned (e.g., 1002), return it. If none is found, return nothing or leave it blank.\n2. **Customer Message** – Return the full, cleaned message text.\n3. **Category** – Choose one of the following, based strictly on content:\n   - `cancel/refund` – If the customer mentions cancelling, being unhappy, or asking for a refund.\n   - `shipping/product` – If the customer asks about delivery, tracking, or product use.\n   - `happy customer` – If the customer gives positive feedback or expresses satisfaction.\n",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Order Number",
+              "type": "number",
+              "description": "it is a number in the message,"
+            },
+            {
+              "name": "Customer Message",
+              "description": "the entire customer message",
+              "required": true
+            },
+            {
+              "name": "Category",
+              "description": "Based on the message content, determine which **one** of the following categories it belongs to: - `cancel/refund`: the customer is unhappy, wants to cancel, or mentions a refund - `shipping/product`: the customer asks about their order, product issues, tracking, or how to use the product - `happy customer`: the customer is satisfied, sharing a positive experience or compliment  Output the category first: ",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        1240
+      ],
+      "id": "c4c5322c-cb8f-44e9-a1e3-b5861e0240a3",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are {{agent_name}}, a friendly and helpful customer support agent for the brand {{brand_name}}. Your job is to make customers feel heard, supported, and clearly guided. Avoid robotic or scripted replies — always sound human, informed, and caring.\n\nYou are responding to this message:\n\n\"{{ $json.output['Customer Message'] }}\"\n\n---\n\n### Step 1 — Use the category to guide your response:\nCategory: {{ $json.output.Category }}\n\n#### If it's `cancel/refund`:\n- Never offer or suggest a refund, even if the customer asks.\n- Assume they may be using the product incorrectly.\n- Search the vector store (`Business_Database`) for usage instructions.\n- Explain clearly how to get the best results (e.g. clean/dry nose, press firmly, replace sticker, choose correct band size).\n\n#### If it's `shipping/product`:\n{{ $json.output['Order Number'] }}\n- If an order number is available, use the Shopify HTTP Request to fetch order info.\n- **Only mention shipping location** if the customer asks where their product is, this can be located under \"shipping_address\".\n  - In that case, check the shipping country from the Shopify response and say it’s currently at our warehouse there.\n\n- If no order number is available, politely ask for it to assist further.\n\n#### If it’s `happy customer`:\n- Thank them sincerely and acknowledge their feedback.\n- Reflect the brand tone and reinforce their positive experience.\n\n---\n\n### Final Output Instructions:\n- Output **only** your final reply (no formatting, no labels).\n- Always close with a kind sign-off in this format:\nBest,\n{{agent_name}}\n{{brand_name}} Support Team",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -20,
+        1240
+      ],
+      "id": "c6c7fade-e189-4a7f-9283-df0b5678b0c5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        240,
+        1680
+      ],
+      "id": "5130fb90-cebb-49b6-9ba0-87d4e3bbb59a",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Makes an HTTP request when you have an order number. ",
+        "url": "=https://n8n-integration-test.myshopify.com/admin/api/2023-10/orders.json?name={{ $json.output['order number'].replace('#', '') }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        1480
+      ],
+      "id": "cdb7a521-92b2-4786-b92d-edbfa22db30f",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "aLS9uQrrpE5QHibu",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "Business_Database",
+        "toolDescription": "Enables the AI agent to retrieve relevant brand knowledge (e.g., product details, policies, FAQs) from Inha1e’s Pinecone vector database for smarter, brand-aligned responses.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "inha1e-databse",
+          "mode": "list",
+          "cachedResultName": "inha1e-databse"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.1,
+      "position": [
+        840,
+        1560
+      ],
+      "id": "d304b705-63fa-4cd5-84ad-e14e11bfed07",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "70n7MN8DPjrlX0Ca",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        740,
+        1640
+      ],
+      "id": "0d1fc147-3592-4666-a206-0f05279b8f4b",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "2rdkqvzVqstsA7yD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\nchange to the email account linked to customer support. ",
+        "height": 300,
+        "width": 260,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        1120
+      ],
+      "id": "fe894e0a-fa0c-491d-8879-252b93e4d06d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Message Extractor\nchecks for order number and understand customer message",
+        "height": 260,
+        "width": 340
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        1120
+      ],
+      "id": "5b765a14-d95d-4f73-aa6e-20eeacd1575d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Model\nI use open router \nbecause it gives \neasy access to \nall models. ",
+        "height": 220,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        1400
+      ],
+      "id": "2d88f789-2bcf-4bc3-a523-aaa102d8fb01",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-3.7-sonnet",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        1460
+      ],
+      "id": "168a9da4-e0df-4e48-9d03-2abac1dbf783",
+      "name": "OpenRouter - Claude 3.7",
+      "credentials": {
+        "openRouterApi": {
+          "id": "srSg7y6z8CLIxyxo",
+          "name": "OpenRouter - X Bot Brain Picker"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        1480
+      ],
+      "id": "8402ba8e-5f1c-437d-8c82-127ab7ce1281",
+      "name": "OpenRouter - gpt 4o mini",
+      "credentials": {
+        "openRouterApi": {
+          "id": "srSg7y6z8CLIxyxo",
+          "name": "OpenRouter - X Bot Brain Picker"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Brain\nI use Claude \nbecause best \nfor writing, but \nchange pending \non your needs\n\n",
+        "height": 200,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        1400
+      ],
+      "id": "35eebc90-b07b-4cde-a3e8-da5f9e462070",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Access to Shopify\nsearch shopify \nstore for orders\nand customer \ninformation\n\n",
+        "height": 200,
+        "width": 280,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1400
+      ],
+      "id": "5e970708-24f6-4016-9d9a-8c026c1b7cf6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Customer Support Agent\n\nThis AI agent reads each customer message, determines what the user is asking (e.g. order tracking, product help, general question), and takes appropriate action:\n",
+        "height": 280,
+        "width": 420,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        1100
+      ],
+      "id": "6d053b31-e766-4194-9d39-e27b00a39d7f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Output email to customer\nchange to same email as trigger and bring through customer email. ",
+        "height": 300,
+        "width": 260,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        340,
+        1080
+      ],
+      "id": "f8c0598f-877a-4982-9398-f6d27c792b0d",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Think\njust uses its brain \nif the customer \nis being a retard\n\n",
+        "height": 200,
+        "width": 280,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        80,
+        1620
+      ],
+      "id": "69e30776-41a3-4b41-802a-cc7d10e3e06e",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Vector Store (Pinecone)\n\nThis memory tool lets the AI agent search your brand database to give accurate, on-brand replies.\n\n### What to add:\n- Product info\n- How-to guides\n- Benefits\n- Policies (refunds, shipping)\n- FAQs or common issues\n\nEach entry should have:\n- A unique ID\n- A short text block (1–3 paragraphs)\n\n### How it works:\nWhen a user asks a question, the agent looks in this vector store (via semantic search) to find relevant info — then uses it to answer properly.\n\n> Keeps replies consistent, smart, and always on-brand — without overloading the prompt.",
+        "height": 480,
+        "width": 740
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        1420
+      ],
+      "id": "dd985bfc-d573-4769-b1b7-1352cae4271c",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        420,
+        1220
+      ],
+      "id": "99c511b2-ced7-4dce-9189-0bd79f384503",
+      "name": "Gmail",
+      "webhookId": "b58266af-ec1a-47e3-81c6-b0843593a9a0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "h6Ah1h013F5wEKFK",
+          "name": "Test Account (RA)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $workflow.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -60,
+        1680
+      ],
+      "id": "13260b50-4f5d-4e56-a3d5-6e499050b527",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_2565623155255449763"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        820
+      ],
+      "id": "f692df1e-433f-4999-a1d2-bac9d75406fd",
+      "name": "Cancel/Refund",
+      "webhookId": "966a57af-4489-4ded-9318-ed95c67aa1f0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "h6Ah1h013F5wEKFK",
+          "name": "Test Account (RA)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_7175660225432074345"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        1000
+      ],
+      "id": "99f91281-950b-485f-9dc8-feff2883136e",
+      "name": "Shipping/Product",
+      "webhookId": "966a57af-4489-4ded-9318-ed95c67aa1f0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "h6Ah1h013F5wEKFK",
+          "name": "Test Account (RA)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "Label_592856384277275422"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        1180
+      ],
+      "id": "6ae9daad-2c1d-4f81-887c-add2fb3a9e1a",
+      "name": "Happy Customers",
+      "webhookId": "966a57af-4489-4ded-9318-ed95c67aa1f0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "h6Ah1h013F5wEKFK",
+          "name": "Test Account (RA)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "8e03e2e6-26e8-4387-9aca-50d1f469d08b",
+                    "leftValue": "={{ $('Information Extractor').item.json.output.Category }}",
+                    "rightValue": "cancel/refund",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0ca08ff0-4030-4b03-8357-e06df609df27",
+                    "leftValue": "={{ $('Information Extractor').item.json.output.Category }}",
+                    "rightValue": "shipping/product",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Information Extractor').item.json.output.Category }}",
+                    "rightValue": "happy customer",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "349e9151-8f61-4730-97b2-732620eaf6f7"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        680,
+        1000
+      ],
+      "id": "f58630e9-bfa5-4672-af2c-3e30b5fcc64b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "text": "=Customer wanting a refund. \n\n{{ $('Information Extractor').item.json.output['Customer Message'] }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1160,
+        820
+      ],
+      "id": "3c70e227-7857-47db-835c-e3ed3dbfeb67",
+      "name": "Slack",
+      "webhookId": "fdde5b89-9573-4c25-b199-95e719432c9e",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1160,
+        1000
+      ],
+      "id": "9efc80fc-f0bb-4ebb-a800-d28abed69667",
+      "name": "Slack1",
+      "webhookId": "fdde5b89-9573-4c25-b199-95e719432c9e",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        1160,
+        1180
+      ],
+      "id": "cc22a107-dbc4-4dde-8b12-d38fa2b76734",
+      "name": "Slack2",
+      "webhookId": "fdde5b89-9573-4c25-b199-95e719432c9e",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -680,
+        1240
+      ],
+      "id": "21340f61-6080-456c-b81b-6ce7fcb7ac8b",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "h6Ah1h013F5wEKFK",
+          "name": "Test Account (RA)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Message Labels\n\ndepending on the message \ncategory they will be filtered \ninto specific labels in gmail \nfor organisational \npurposes and easy \naccess for human in the loop.",
+        "height": 600,
+        "width": 740
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        620,
+        780
+      ],
+      "id": "e160e704-f910-44f2-8d22-ea30fe6c4ee3",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "## Memory\nGets past \nconvos\n\n",
+        "height": 200,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        1620
+      ],
+      "id": "012b9558-1606-42c4-a2e5-fa6704761b43",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Whats cooking sexy people, hope you enjoy the workflow and saves you from interacting with annoying customers.\n\n## Everything needed should be on the Set up Guide, if not please don't hesitate to reach out. (@NoahEpstein_)\n\n## - From, big dawg Noz\n",
+        "height": 340,
+        "width": 1080,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        720
+      ],
+      "id": "a84e6296-0b67-4c87-bcf7-5a90a3eabeaa",
+      "name": "Sticky Note11"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter - Claude 3.7": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter - gpt 4o mini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Cancel/Refund",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Shipping/Product",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Happy Customers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cancel/Refund": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shipping/Product": {
+      "main": [
+        [
+          {
+            "node": "Slack1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Happy Customers": {
+      "main": [
+        [
+          {
+            "node": "Slack2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "806459f5-4c06-492b-853e-1e95e0c51307",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0fb75cf7fe95e3dad8680101bdc45549409c0f747d9491461d65b61bd6537e9"
+  },
+  "id": "BEKHaEQJe7g8Nm8t",
+  "tags": []
+}

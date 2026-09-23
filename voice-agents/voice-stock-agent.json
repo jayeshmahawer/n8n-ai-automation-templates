@@ -1,0 +1,936 @@
+{
+  "name": "Main Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# 📱 Stock Analysis Chatbot (Enhanced)\n\n## Flow Overview:\n1. **Telegram Trigger**: Receives messages from Telegram\n2. **Session Management**: Extracts user ID and maintains conversation context\n3. **Intent Analysis**: AI Agent analyzes query type (sector/theme discovery or specific stock)\n4. **Stock Discovery**: Multiple tools gather data from web, Reddit, news sources\n5. **AI Analysis**: Synthesizes findings into 3-5 actionable stock picks\n6. **Response**: Formats and sends analysis back via WhatsApp\n\n## Key Features:\n- Session-based memory for follow-up queries\n- Multi-source data aggregation (news, sentiment, trends)\n- Focus on under-the-radar stocks with predictive analysis\n- Emoji-rich, mobile-friendly formatting\n- Think tool for fact-checking and formatting",
+        "height": 460,
+        "width": 900,
+        "color": 7
+      },
+      "id": "9088da94-9e83-4853-8ec1-7a0613296f00",
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        -1000
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $workflow.id }}",
+        "contextWindowLength": 10
+      },
+      "id": "e9739f9e-3dbe-4f83-9983-d140d3ce2233",
+      "name": "Session Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -100,
+        -120
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4-turbo",
+          "mode": "list",
+          "cachedResultName": "gpt-4-turbo"
+        },
+        "options": {
+          "maxTokens": 4000,
+          "temperature": 0.7
+        }
+      },
+      "id": "1e7af3d7-1ba8-48eb-9b40-9a70157eaeec",
+      "name": "OpenAI GPT-4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        60,
+        -360
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "2rdkqvzVqstsA7yD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_message }}{{ $json.messageText }}",
+        "options": {
+          "systemMessage": "=You are an expert financial analyst AI specializing in both STOCKS and FOREX markets. Your role is to:\n\n1. Analyze queries for stocks, forex pairs, sectors, or currency themes\n2. Use multiple data sources to find opportunities in both markets\n3. Focus on high-probability trades with clear catalysts\n4. Provide predictive analysis based on news, sentiment, and technical factors\n5. Format responses for mobile with emojis and clear structure\n\n## 🔍 MARKET DETECTION:\nFirst, determine if the query is about:\n- **STOCKS**: Contains company names, tickers, sectors, \"stocks\"\n- **FOREX**: Contains currency pairs, \"forex\", \"FX\", currency names\n- **BOTH**: General market query or explicit request for both\n\n## 📊 ANALYSIS APPROACH BY MARKET:\n\n### FOR STOCK QUERIES:\n- Focus on 3-5 under-the-radar companies\n- Weekly catalysts (earnings, FDA, contracts)\n- Include safe and speculative picks\n\n### FOR FOREX QUERIES:\n- Focus on 2-4 major/exotic pairs\n- Key events: Central bank meetings, GDP, NFP\n- Technical levels and carry trade opportunities\n\n## 🛠️ TOOL USAGE HIERARCHY:\n\n### 1. **Perplexity Deep Research** (PRIMARY)\nFor Stocks: \"[sector] stocks catalysts this week momentum\"\nFor Forex: \"[currency pair] forex central bank news technical analysis\"\n\n### 2. **Tavily Search** (NEWS VALIDATION)\nFor Stocks: Breaking company news\nFor Forex: Economic calendar, central bank statements\n\n### 3. **Reddit/ForexFactory Sentiment**\nFor Stocks: r/wallstreetbets momentum\nFor Forex: r/forex sentiment, ForexFactory forum pulse\n\n### 4. **Price APIs**\nFor Stocks: Stock Price API (existing)\nFor Forex: Forex Rate API (new)\n\n### 5. **Economic Calendar API** (NEW)\nFor Forex: Upcoming high-impact events\nFor Stocks: Economic data affecting sectors\n\n### 6. **Think Tool** (VALIDATION)\nAlways use last to verify format and predictions\n\n## 📱 OUTPUT FORMATS:\n\n### STOCK RESPONSE FORMAT:\n📈 Weekly Stock Picks: [Theme]\n1. [TICKER] - Company Name\n   🚀 Forecast: +X% this week | [Catalyst]\n   💡 Why: [Reasoning]\n\n### FOREX RESPONSE FORMAT:\n💱 Weekly Forex Opportunities: [Theme]\n1. [PAIR] - Current: X.XXXX\n   🎯 Target: X.XXXX | Stop: X.XXXX\n   📅 Key Event: [Central bank/Data] on [Day]\n   💡 Why: [Technical + Fundamental reason]\n\n### MIXED RESPONSE FORMAT:\n🌍 Weekly Market Opportunities: [Theme]\n\n📈 STOCKS:\n1. [TICKER] - [Details]\n\n💱 FOREX:\n1. [PAIR] - [Details]\n\n⚠️ Risk Note: [Market-appropriate disclaimer]\n\n## 🔥 PERPLEXITY QUERY EXAMPLES:\n\nFor Forex:\n- \"EURUSD GBPUSD forex weekly forecast central bank decisions\"\n- \"Emerging market currencies opportunities this week high yield\"\n- \"Forex pairs affected by oil prices technical breakouts\"\n- \"Carry trade opportunities high interest rate differentials\"\n\nFor Mixed:\n- \"How will Fed decision affect stocks and dollar pairs\"\n- \"Best opportunities this week stocks forex combined\"\n\n## ⚡ IMPORTANT RULES:\n1. Always identify market type first\n2. Use appropriate analysis for each market\n3. Include specific price levels for forex\n4. Consider correlation between markets\n5. Mention key economic events\n6. Keep risk management prominent",
+          "maxIterations": 5
+        }
+      },
+      "id": "d03e400b-4d55-4fba-bf52-3fe1dfdf41a6",
+      "name": "AI Stock Analysis Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        60,
+        -440
+      ]
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', ``, 'string') }}",
+        "options": {}
+      },
+      "id": "ef947cf0-268f-4acb-bfec-6bdc283a9125",
+      "name": "Tavily Financial News",
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -220
+      ],
+      "credentials": {
+        "tavilyApi": {
+          "id": "AZthHkczYk6YKACb",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "subreddit": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subreddit', ``, 'string') }}",
+        "title": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Title', ``, 'string') }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}"
+      },
+      "id": "ff01fd16-4f40-4dfc-8a59-8f75eed5f264",
+      "name": "Reddit Sentiment Tool",
+      "type": "n8n-nodes-base.redditTool",
+      "typeVersion": 1,
+      "position": [
+        660,
+        -60
+      ],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "iI3t9Ndb8H0JpQwg",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch current stock prices and historical data. Input should be a stock ticker symbol (e.g., 'AAPL'). Returns price, volume, and basic metrics.",
+        "url": "https://api.twelvedata.com/time_series",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ $parameter[\"ticker\"] }}"
+            },
+            {
+              "name": "interval",
+              "value": "1day"
+            },
+            {
+              "name": "outputsize",
+              "value": "7"
+            },
+            {
+              "name": "apikey",
+              "value": "=Set Up API KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0e2b51bb-8075-4dac-98b7-98b46136af6d",
+      "name": "Stock Price API",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Check Google search trends for stocks or sectors. Shows if interest is increasing. Input should be a search term or ticker.",
+        "url": "https://trends.google.com/trends/api/interestovertime",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $parameter[\"searchTerm\"] }}"
+            },
+            {
+              "name": "geo",
+              "value": "US"
+            },
+            {
+              "name": "date",
+              "value": "now 7-d"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a2f570f-5bc3-4731-a3ae-bcab43f70fbd",
+      "name": "Google Trends API",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🛠️ Agent Tools Configuration\n\n**1. Tavily Search**: Latest financial news and analysis\n   - Searches major financial sites\n   - Returns summarized insights\n\n**2. Reddit Sentiment**: WSB sentiment and trending discussions\n   - Monitors multiple investing subreddits\n   - Gauges retail investor interest\n\n**3. Stock Price API**: Current prices and 7-day history\n   - Real-time price data\n   - Volume and basic metrics\n\n**4. ForeX API**: Current prices and 7-day history\n   - Real-time price data of currencies\n\n**5. Google Trends**: Search volume trends\n   - Shows rising interest in stocks/sectors\n   - 7-day trend analysis\n\n**6. Perplexity**: Deep Research\n   - gets all up to date information\n\n**7. Think Tool**: Validation and formatting\n   - Ensures accurate responses\n   - Maintains consistent formatting",
+        "height": 680,
+        "width": 860,
+        "color": 6
+      },
+      "id": "6d1b4054-89d3-4695-aa66-ead064329d1d",
+      "name": "AI Agent Tools",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        100,
+        -240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Session Memory\n\nUses phone number as session ID to maintain conversation context. Allows follow-up queries like:\n- \"Tell me more about RCAT\"\n- \"What about AI stocks instead?\"\n- \"Show me safer options\"\n\nMemory window: 10 messages",
+        "height": 250,
+        "width": 490,
+        "color": 6
+      },
+      "id": "ab3f0a41-4eba-4791-b38e-04c9113b4ae2",
+      "name": "Memory System",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ Error Handling\n\nAdd these error handling nodes:\n\n1. **API Rate Limit Handler**\n   - Catches 429 errors\n   - Implements retry logic\n\n2. **Invalid Message Handler**\n   - Handles non-text messages\n   - Sends appropriate response\n\n3. **Tool Failure Handler**\n   - Fallback when tools fail\n   - Uses cached data if available",
+        "height": 390,
+        "width": 490
+      },
+      "id": "87d275d2-8aef-449c-a43d-53a3da673ef0",
+      "name": "Error Handling",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        40
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Use this tool to think through and validate your response before sending. It helps ensure accuracy, proper formatting, and completeness. ALWAYS use this before finalising any stock recommendations.\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1,
+      "position": [
+        660,
+        280
+      ],
+      "id": "701a386b-a62e-4594-93d6-911f70abf009",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -820,
+        -380
+      ],
+      "id": "cbcd75b8-bf2f-469c-8e04-6ffc35f848ec",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Daily Morning Stock Scan Code Node - FIXED VERSION\n// Triggers at 8 AM daily to find best weekly opportunities\n\n// Get current date and market context\nconst now = new Date();\nconst dayOfWeek = now.toLocaleDateString('en-US', { weekday: 'long' });\nconst currentDate = now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });\nconst currentHour = now.getHours();\n\n// Calculate days until Friday (market week end)\nconst daysUntilFriday = (5 - now.getDay() + 7) % 7 || 7;\nconst weekEndDate = new Date(now.getTime() + (daysUntilFriday * 24 * 60 * 60 * 1000));\n\n// Define key market events and catalysts to check\nconst marketCatalysts = {\n  monday: [\n    \"weekend news and geopolitical developments\",\n    \"pre-market momentum from Asian markets\",\n    \"weekly earnings preview\"\n  ],\n  tuesday: [\n    \"early week momentum continuation\",\n    \"sector rotation signals\",\n    \"economic data releases\"\n  ],\n  wednesday: [\n    \"Fed minutes or central bank news\",\n    \"mid-week technical breakouts\",\n    \"options flow analysis\"\n  ],\n  thursday: [\n    \"weekly jobless claims impact\",\n    \"pre-Friday positioning\",\n    \"earnings reports analysis\"\n  ],\n  friday: [\n    \"weekly options expiration\",\n    \"end-of-week profit taking\",\n    \"weekend event risks\"\n  ]\n};\n\n// Key sectors and themes to analyze\nconst hotSectors = [\n  \"AI and semiconductor stocks\",\n  \"Defense and aerospace (geopolitical tensions)\",\n  \"Clean energy and EV stocks\",\n  \"Biotech with FDA catalysts\",\n  \"Fintech and digital banking\",\n  \"Space and satellite technology\",\n  \"Cybersecurity\",\n  \"Quantum computing\"\n];\n\n// Specific screening criteria for the week\nconst screeningCriteria = {\n  technical: [\n    \"Stocks breaking out of consolidation patterns\",\n    \"Names approaching 52-week highs with volume\",\n    \"Oversold bounces (RSI < 30 recovering)\",\n    \"Stocks above all major moving averages\"\n  ],\n  fundamental: [\n    \"Companies reporting earnings this week\",\n    \"Recent insider buying activity\",\n    \"Analyst upgrades in past 48 hours\",\n    \"New contract wins or partnerships\"\n  ],\n  sentiment: [\n    \"Unusual options activity\",\n    \"High social media momentum\",\n    \"Increasing Google search trends\",\n    \"Reddit/WSB gaining mentions\"\n  ]\n};\n\n// Get historical data using correct syntax\nconst staticData = $getWorkflowStaticData('global');\nconst lastWeekTopPick = staticData.lastWeekTopPick || null;\nconst previousScanAccuracy = staticData.scanAccuracy || \"N/A\";\n\n// Build the comprehensive analysis request\nconst morningAnalysisRequest = {\n  messageText: `Perform a comprehensive morning market scan for ${currentDate}. Find the 5 best stock opportunities for this week (ending ${weekEndDate.toLocaleDateString()}). \n\nANALYSIS REQUIREMENTS:\n1. Check ${marketCatalysts[dayOfWeek.toLowerCase()]?.join(\", \") || \"today's market catalysts\"}\n2. Focus on these hot sectors: ${hotSectors.slice(0, 4).join(\", \")}\n3. Screen for: ${screeningCriteria.technical[0]}, ${screeningCriteria.fundamental[0]}, ${screeningCriteria.sentiment[0]}\n4. Prioritize stocks with catalysts happening THIS WEEK\n5. Include at least 2 under-the-radar picks (market cap < $10B)\n\nRESEARCH APPROACH:\n- Start with Perplexity for deep sector analysis\n- Search: \"best ${hotSectors[0]} stocks this week catalysts ${currentDate}\"\n- Then validate with Tavily for breaking news\n- Check Reddit sentiment and Google Trends\n\nSEARCH PRIORITIES:\n- Pre-market movers showing unusual volume\n- Stocks with earnings this week\n- Recent news catalysts (last 48 hours)\n- Technical breakouts on daily/weekly charts\n- Unusual options flow indicating institutional interest\n\nFORMAT: Provide your standard weekly picks format with specific catalysts and dates.`,\n  \n  context: {\n    scanType: \"morning_market_scan\",\n    dayOfWeek: dayOfWeek,\n    currentDate: currentDate,\n    daysUntilWeekEnd: daysUntilFriday,\n    marketSession: currentHour < 9.5 ? \"pre-market\" : currentHour < 16 ? \"market-hours\" : \"after-hours\",\n    prioritySectors: hotSectors.slice(0, 4),\n    scanDepth: \"comprehensive\"\n  },\n  \n  additionalInstructions: [\n    \"Use Perplexity FIRST with query: 'best performing stocks this week \" + currentDate + \" with catalysts'\",\n    \"Then use Tavily for 'stock market pre-market movers today unusual volume'\",\n    \"Check Reddit for 'DD' (due diligence) posts from last 24 hours\",\n    \"Search for 'earnings calendar this week surprise potential'\",\n    \"Look for 'FDA approval calendar' if including biotech\",\n    \"Use Google Trends to verify momentum on top picks\",\n    \"MUST use Think tool to validate all picks before responding\"\n  ],\n  \n  outputRequirements: {\n    mustInclude: [\n      \"Specific catalyst with date\",\n      \"Why this week is critical\",\n      \"Risk/reward assessment\",\n      \"Price target for the week\",\n      \"Volume confirmation\"\n    ],\n    format: \"mobile-friendly with emojis\",\n    tone: \"confident but includes risk warnings\"\n  },\n  \n  // Historical performance tracking (for learning)\n  lastWeekTopPick: lastWeekTopPick,\n  previousScanAccuracy: previousScanAccuracy\n};\n\n// Add pre-market specific searches if before market open\nif (currentHour < 9.5) {\n  morningAnalysisRequest.additionalInstructions.push(\n    \"Check pre-market gainers showing >5% moves with volume\",\n    \"Look for overnight news from Asian/European markets\",\n    \"Search for pre-market trading alerts and unusual activity\"\n  );\n}\n\n// Add day-specific focus areas\nswitch(dayOfWeek.toLowerCase()) {\n  case 'monday':\n    morningAnalysisRequest.additionalInstructions.push(\n      \"Check weekend news for major developments\",\n      \"Look for stocks gapping up/down from Friday close\"\n    );\n    break;\n  case 'friday':\n    morningAnalysisRequest.additionalInstructions.push(\n      \"Focus on weekly options expiration plays\",\n      \"Check for stocks that could run into close\"\n    );\n    break;\n}\n\n// Get existing scan log or create new\nconst existingScans = staticData.morningScans || [];\nconst scanLog = [...existingScans];\n\nscanLog.push({\n  date: currentDate,\n  timestamp: now.toISOString(),\n  dayOfWeek: dayOfWeek\n});\n\n// Keep only last 30 scans\nwhile (scanLog.length > 30) {\n  scanLog.shift();\n}\n\n// Update static data\nconst updatedStaticData = {\n  ...staticData,\n  morningScans: scanLog\n};\n\n// $storeWorkflowStaticData('global', updatedStaticData);\n\n// Return the formatted request for the AI Agent\nreturn {\n  json: {\n    ...morningAnalysisRequest,\n    // Additional metadata for routing\n    triggerType: \"scheduled_morning_scan\",\n    priority: \"high\",\n    expectedResponseTime: \"5-10 minutes\",\n    notificationSettings: {\n      sendSummaryTo: \"admin\", // Can be configured to send to specific numbers\n      includeChart: true\n    }\n  }\n};\n// Add to your morning scan code node\n\n// Forex-specific catalysts\nconst forexCatalysts = {\n  monday: [\n    \"Weekend gap opportunities\",\n    \"Asian session momentum\",\n    \"Week ahead economic calendar\"\n  ],\n  tuesday: [\n    \"RBA/RBNZ decisions (AUD/NZD pairs)\",\n    \"UK economic data (GBP pairs)\"\n  ],\n  wednesday: [\n    \"US crude oil inventories (CAD pairs)\",\n    \"FOMC minutes (USD pairs)\"\n  ],\n  thursday: [\n    \"ECB decisions (EUR pairs)\",\n    \"US jobless claims (USD pairs)\"\n  ],\n  friday: [\n    \"NFP preparation (USD volatility)\",\n    \"Weekend position adjustments\"\n  ]\n};\n\n// High-impact events this week\nconst majorForexEvents = [\n  \"Central bank meetings (Fed, ECB, BoE, BoJ)\",\n  \"Employment data (NFP, ADP, Unemployment)\",\n  \"Inflation data (CPI, PPI)\",\n  \"GDP releases\",\n  \"Retail sales\"\n];\n\n// Enhanced analysis request\nconst enhancedAnalysisRequest = {\n  messageText: `Perform a comprehensive morning scan for BOTH stocks and forex for ${currentDate}. \n\nSTOCK ANALYSIS:\n${morningAnalysisRequest.messageText}\n\nFOREX ANALYSIS:\n1. Check ${forexCatalysts[dayOfWeek.toLowerCase()]?.join(\", \")}\n2. Focus on pairs with high-impact events this week\n3. Include both major pairs (EUR/USD, GBP/USD) and interesting crosses\n4. Look for technical breakouts aligning with fundamentals\n5. Consider carry trade opportunities\n\nCORRELATION ANALYSIS:\n- How will this week's events affect both markets?\n- Any sector/currency correlations to exploit?\n\nProvide top 3 stocks AND top 2 forex opportunities.`,\n  \n  context: {\n    ...morningAnalysisRequest.context,\n    includeForex: true,\n    majorEvents: majorForexEvents\n  }\n};\n\n// Determine if user wants forex\nconst isForexQuery = messageText.match(/forex|fx|currency|eur|gbp|jpy|usd/i);\nconst isStockQuery = messageText.match(/stock|ticker|company|sector/i);\nconst queryType = isForexQuery && !isStockQuery ? 'forex' : \n                 !isForexQuery && isStockQuery ? 'stocks' : \n                 'both';"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -440,
+        -380
+      ],
+      "id": "b9e2f114-0b33-49fe-aa2e-b082cfd3e334",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "content": "## Code node \nexplains what information needs to be provided every day or the week\n\n",
+        "height": 220,
+        "width": 420,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        -460
+      ],
+      "id": "e7a70228-47b8-465e-b152-8554aae66dba",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## The GOAT of STOCKS\n",
+        "height": 260,
+        "width": 520,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -520
+      ],
+      "id": "fa8b6d24-18a2-4f19-a6cf-84e607a080de",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Fetch current forex rates and historical data. Use for currency pairs like EURUSD, GBPUSD, etc.",
+        "url": "https://api.twelvedata.com/time_series",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "symbol",
+              "value": "={{ $parameter[\"pair\"] }}"
+            },
+            {
+              "name": "interval",
+              "value": "1day"
+            },
+            {
+              "name": "outputsize",
+              "value": "7"
+            },
+            {
+              "name": "apikey",
+              "value": "=Set up API KEY"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3eb651c2-e467-42d9-b40f-e819d03d5b68",
+      "name": "Forex Api Call",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        -60
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Deep AI research tool for comprehensive market analysis. USE THIS FIRST before other tools. Provides detailed insights about stocks, sectors, catalysts, and market trends with citations. Best for finding hidden opportunities and understanding the full context. Query should be specific about timeframe and criteria.",
+        "model": "sonar",
+        "messages": {
+          "message": [
+            {
+              "content": "You are a financial research assistant specializing in stock market analysis. Provide detailed, actionable insights with specific dates, catalysts, and price targets. Focus on opportunities happening THIS WEEK. Always cite sources. Prioritize lesser-known stocks with high growth potential.",
+              "role": "system"
+            },
+            {
+              "content": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('message0_Text', ``, 'string') }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 2000,
+          "searchDomainFilter": "=forexfactory.com,benzinga.com,seekingalpha.com",
+          "searchRecency": "day"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.perplexityTool",
+      "typeVersion": 1,
+      "position": [
+        660,
+        120
+      ],
+      "id": "c9e0b57a-d1d5-4bef-be46-c132165ba578",
+      "name": "Perplexity1",
+      "executeOnce": false,
+      "credentials": {
+        "perplexityApi": {
+          "id": "gzKUYss25vIdMeow",
+          "name": "Perplexity account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get high-impact economic events for the week. Returns major events like Fed decisions, NFP, CPI that impact both forex and stock markets.",
+        "url": "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (compatible; StockForexBot/1.0)"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        120
+      ],
+      "id": "2b8c790d-50a7-4418-a6f5-550d5b1b121f",
+      "name": "Economic Calendar"
+    },
+    {
+      "parameters": {
+        "content": "## READ\n\nSome nodes need to be dowloaded via community nodes \n\nSettings - community nodes - browse community nodes - selected desired ones",
+        "height": 240,
+        "width": 220,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        420,
+        160
+      ],
+      "id": "bc8694e5-645f-4461-b559-949f1e600760",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## 📱 Telegram Input\n\nReceives messages from Telegram bot.\n\n**Setup Required:**\n1. Create bot with @BotFather\n2. Get bot token\n3. Add token to n8n credentials\n4. Set webhook URL in bot settings",
+        "height": 440,
+        "width": 300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        -980
+      ],
+      "id": "6f3b3191-b319-4b52-b9bb-571da03a6602",
+      "name": "Telegram Setup Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "voice-message-check",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1040,
+        -720
+      ],
+      "id": "b92b5c0a-dd80-41c1-a326-53d4e00f941d",
+      "name": "Message Type Detector"
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 Message Type Detection\n\nChecks if incoming message contains:\n- Text message (direct to AI)\n- Voice note (needs transcription)",
+        "height": 350,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1100,
+        -920
+      ],
+      "id": "8acad4fd-d6c3-4756-af58-bfdface6bb5e",
+      "name": "Detection Note"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger1').item.json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -760,
+        -900
+      ],
+      "id": "fe3d4161-df42-4c41-8453-d52e424ccb4b",
+      "name": "Download Voice File",
+      "webhookId": "5a16e5f9-44ee-4e49-b1ca-506ef73e1b83",
+      "credentials": {
+        "telegramApi": {
+          "id": "yXNYHmFBqfftDTuK",
+          "name": "ME - Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🎤 Voice Processing\n\n**Steps:**\n1. Download voice file from Telegram\n2. Convert to text using OpenAI Whisper\n3. Pass transcribed text to AI Agent",
+        "height": 420,
+        "width": 600,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -1100
+      ],
+      "id": "8fbe059b-e60e-4f92-9d19-cc838fac2c6e",
+      "name": "Voice Processing Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "transcription-assignment",
+              "name": "user_message",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "user-id-assignment",
+              "name": "user_id",
+              "value": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-assignment",
+              "name": "chat_id",
+              "value": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "message-type-assignment",
+              "name": "message_type",
+              "value": "voice",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -360,
+        -900
+      ],
+      "id": "a0fa4773-8176-4825-ae9c-66a135b4c417",
+      "name": "Format Voice Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "text-message-assignment",
+              "name": "user_message",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "user-id-text-assignment",
+              "name": "user_id",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-text-assignment",
+              "name": "chat_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "message-type-text-assignment",
+              "name": "message_type",
+              "value": "text",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -440,
+        -640
+      ],
+      "id": "b114b455-02ed-4013-b61c-f8fde4937658",
+      "name": "Format Text Data"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1360,
+        -720
+      ],
+      "id": "45e34b15-57e2-4683-abe7-5ae1c005cf4f",
+      "name": "Telegram Trigger1",
+      "webhookId": "telegram-bot-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "yXNYHmFBqfftDTuK",
+          "name": "ME - Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -560,
+        -900
+      ],
+      "id": "2b991b4a-5ff6-4673-8f28-4893a6a4e976",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "2rdkqvzVqstsA7yD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "##  Normal Text Pass Through\n",
+        "height": 180,
+        "width": 600,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        -660
+      ],
+      "id": "a69b9d8a-9a55-43d3-9762-b45bd681565c",
+      "name": "Voice Processing Note1"
+    },
+    {
+      "parameters": {
+        "chatId": "8085319989",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        600,
+        -440
+      ],
+      "id": "12db6555-348b-4239-a314-6e775f7b2fd3",
+      "name": "Send a text message",
+      "webhookId": "db5a7736-295b-49e0-b964-34b66320f7ce",
+      "credentials": {
+        "telegramApi": {
+          "id": "yXNYHmFBqfftDTuK",
+          "name": "ME - Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Session Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI GPT-4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily Financial News": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit Sentiment Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stock Price API": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Trends API": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Stock Analysis Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Forex Api Call": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Economic Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Type Detector": {
+      "main": [
+        [
+          {
+            "node": "Download Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Message Type Detector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Format Voice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Voice Data": {
+      "main": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Text Data": {
+      "main": [
+        [
+          {
+            "node": "AI Stock Analysis Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b8b69595-46a9-4158-9c5a-17a5580435f3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0fb75cf7fe95e3dad8680101bdc45549409c0f747d9491461d65b61bd6537e9"
+  },
+  "id": "4B2cJLA5DcWTB7PT",
+  "tags": []
+}

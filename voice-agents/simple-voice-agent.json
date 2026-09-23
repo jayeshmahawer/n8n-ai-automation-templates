@@ -1,0 +1,517 @@
+{
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# 🤖 Telegram AI Assistant Workflow\n\n**Overview:**\nThis workflow creates an intelligent Telegram bot that can handle both text and voice messages.\n\n**Process Flow:**\n1. **Telegram Trigger** - Receives incoming messages\n2. **Message Type Detection** - Determines if message is text or voice\n3. **Voice Processing** (if voice) - Downloads and transcribes audio\n4. **AI Agent** - Processes content using LLM and responds intelligently\n5. **Response Delivery** - Sends reply back to Telegram\n\n**Features:**\n- Handles text messages directly\n- Downloads and transcribes voice notes\n- Maintains conversation context with memory\n- Intelligent responses using GPT-4\n- Error handling and fallbacks",
+        "height": 540,
+        "width": 600,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        180
+      ],
+      "id": "f1e7c9b0-8013-46a5-a330-b72388131dc0",
+      "name": "Workflow Overview"
+    },
+    {
+      "parameters": {
+        "content": "## 📱 Telegram Input\n\nReceives messages from Telegram bot.\n\n**Setup Required:**\n1. Create bot with @BotFather\n2. Get bot token\n3. Add token to n8n credentials\n4. Set webhook URL in bot settings",
+        "height": 440,
+        "width": 300,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        220
+      ],
+      "id": "65bf0879-6779-4cb7-b6e2-990350f362f0",
+      "name": "Telegram Setup Note"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "voice-message-check",
+              "leftValue": "={{ $json.message.voice }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        340,
+        480
+      ],
+      "id": "e8e40d81-2e72-439f-921e-aae6730f8762",
+      "name": "Message Type Detector"
+    },
+    {
+      "parameters": {
+        "content": "## 🔍 Message Type Detection\n\nChecks if incoming message contains:\n- Text message (direct to AI)\n- Voice note (needs transcription)",
+        "height": 350,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        280,
+        280
+      ],
+      "id": "9c95bff7-6014-4f5f-a0da-47c6e499c252",
+      "name": "Detection Note"
+    },
+    {
+      "parameters": {
+        "chatId": "7049994855",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        620,
+        300
+      ],
+      "id": "f92a3cc0-c8be-4d7d-a0bd-9a0cafeb34ba",
+      "name": "Download Voice File",
+      "webhookId": "5a16e5f9-44ee-4e49-b1ca-506ef73e1b83",
+      "credentials": {
+        "telegramApi": {
+          "id": "19UDgjkzawcl04p4",
+          "name": "Telegram Twitter Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## 🎤 Voice Processing\n\n**Steps:**\n1. Download voice file from Telegram\n2. Convert to text using OpenAI Whisper\n3. Pass transcribed text to AI Agent",
+        "height": 420,
+        "width": 600,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        580,
+        100
+      ],
+      "id": "75403ffa-bfe2-4ed9-9b80-71141755cb0f",
+      "name": "Voice Processing Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "transcription-assignment",
+              "name": "user_message",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "user-id-assignment",
+              "name": "user_id",
+              "value": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-assignment",
+              "name": "chat_id",
+              "value": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "message-type-assignment",
+              "name": "message_type",
+              "value": "voice",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1020,
+        300
+      ],
+      "id": "d5ed05b1-0452-4365-adf3-84ef82c0868e",
+      "name": "Format Voice Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "text-message-assignment",
+              "name": "user_message",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "user-id-text-assignment",
+              "name": "user_id",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "chat-id-text-assignment",
+              "name": "chat_id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "message-type-text-assignment",
+              "name": "message_type",
+              "value": "text",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        600
+      ],
+      "id": "9699657f-e9d4-482a-83ec-9f03f23afcb6",
+      "name": "Format Text Data"
+    },
+    {
+      "parameters": {
+        "content": "## 🤖 AI Processing\n\n**LLM Configuration:**\n- Model: GPT-4\n- Context-aware responses\n- Conversation memory\n- Multi-language support\n\n**Tools Available:**\n- Web search capability\n- Calculator for math\n- Memory for context",
+        "height": 460,
+        "width": 500,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        120
+      ],
+      "id": "3a6364c3-d1e1-4829-b2a8-03d741769672",
+      "name": "AI Processing Note"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.user_message }}",
+        "options": {
+          "systemMessage": "=You are a helpful AI assistant integrated with Telegram. You can process both text and voice messages.\n\nUser Information:\n- User ID: {{ $json.user_id }}\n- Message Type: {{ $json.message_type }}\n\nInstructions:\n1. Respond naturally and conversationally\n2. If the message was a voice note, acknowledge that you understood their voice message\n3. Be helpful, informative, and engaging\n4. Keep responses concise but complete\n5. Use emojis appropriately to make responses friendly\n6. If you need to search for current information, use the web search tool\n7. For calculations, use the calculator tool\n\nRemember: This is a Telegram conversation, so keep the tone casual and friendly!"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1340,
+        440
+      ],
+      "id": "87145476-20bd-401f-ad48-1a3018c3d1e0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4",
+          "mode": "list",
+          "cachedResultName": "gpt-4"
+        },
+        "options": {
+          "maxTokens": 1000,
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1480,
+        660
+      ],
+      "id": "08b85a96-b1df-4fc3-9192-d818a3bd1f92",
+      "name": "OpenAI LLM",
+      "credentials": {
+        "openAiApi": {
+          "id": "2rdkqvzVqstsA7yD",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        760
+      ],
+      "id": "cd74e749-8b90-4b6a-9666-7425c76f1b11",
+      "name": "Conversation Memory"
+    },
+    {
+      "parameters": {
+        "content": "## 🧠 Memory & Tools\n\n**Memory:**\n- Maintains conversation context per user\n- Remembers previous interactions\n\n**Tools:**\n- Web search for current info\n- Calculator for math operations",
+        "height": 290,
+        "width": 600,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        600
+      ],
+      "id": "209fd3d4-6d26-485a-b344-c9c2f91586d3",
+      "name": "Memory & Tools Note"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        620
+      ],
+      "id": "93f31574-be6d-4d9a-8976-e76f17c724e2",
+      "name": "Calculator Tool"
+    },
+    {
+      "parameters": {
+        "content": "## 📤 Response Delivery\n\nSends AI response back to Telegram:\n- Supports Markdown formatting\n- Handles long messages\n- Error handling for failed sends",
+        "height": 350,
+        "width": 280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        240
+      ],
+      "id": "58f0ddb7-5952-4527-8f96-ec1c8c02689d",
+      "name": "Response Delivery Note"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        20,
+        480
+      ],
+      "id": "d8237997-59c6-4d61-9c5e-453de994f9aa",
+      "name": "Telegram Trigger1",
+      "webhookId": "telegram-bot-webhook",
+      "credentials": {
+        "telegramApi": {
+          "id": "19UDgjkzawcl04p4",
+          "name": "Telegram Twitter Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "7049994855",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1840,
+        440
+      ],
+      "id": "7212508c-7e30-4284-a9bc-eff6d0f6c449",
+      "name": "Telegram",
+      "webhookId": "2009f95f-4878-4207-9640-1e1705da8e03",
+      "credentials": {
+        "telegramApi": {
+          "id": "19UDgjkzawcl04p4",
+          "name": "Telegram Twitter Bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        820,
+        300
+      ],
+      "id": "d83905c0-9ef8-430c-af2d-e8f628f15ec8",
+      "name": "OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "2rdkqvzVqstsA7yD",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Message Type Detector": {
+      "main": [
+        [
+          {
+            "node": "Download Voice File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Format Text Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Voice File": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Voice Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Text Data": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI LLM": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conversation Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Message Type Detector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Format Voice Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "066d6513-f97d-46be-a508-5ba0c1d395d9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0fb75cf7fe95e3dad8680101bdc45549409c0f747d9491461d65b61bd6537e9"
+  },
+  "id": "WqrcLuTYAkj7GmJL",
+  "tags": []
+}

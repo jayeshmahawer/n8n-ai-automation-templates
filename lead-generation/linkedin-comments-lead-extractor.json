@@ -1,0 +1,1357 @@
+{
+  "name": "LinkedIn Comments to Leads Extractor & Enricher (Apify) → Google Sheets / CSV",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "ab47bc44-da40-4dc6-bc5c-b47ed720e56a",
+      "name": "Trigger manually",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -200,
+        200
+      ],
+      "typeVersion": 1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "# 🚀 LinkedIn Comments to Leads Extractor & Enricher (Apify) → Google Sheets / CSV\n\n## Overview\n\n**Automate LinkedIn lead generation by scraping comments from targeted posts and enriching profiles with detailed data**\n\nThis n8n workflow automatically extracts leads from LinkedIn post comments using Apify's powerful scrapers (no LinkedIn login required), enriches the data with additional profile information, and exports everything to Google Sheets or CSV format.\n\n---\n\n## ✨ Key Features\n\n- 🔍 **No Login Required**: Scrape LinkedIn data without sharing credentials\n- 💰 **Cost-Effective**: First 1,000 comments are free with Apify\n- 📊 **Data Enrichment**: Enhance basic comment data with full profile details\n- 📈 **Export Options**: Choose between Google Sheets or CSV output\n- 🎯 **Targeted Scraping**: Focus on specific posts for quality leads\n\n---\n\n## 🛠️ Apify Scrapers Used\n\n### 1. LinkedIn Post Comments Scraper\n- **Tool**: [LinkedIn Post Comments, Replies, Engagements Scraper | No Cookies](https://apify.com/apimaestro/linkedin-post-comments-replies-engagements-scraper-no-cookies/api/python)\n- **Pricing**: $5.00 per 1,000 results\n- **Function**: Extracts all comments and engagement data from specified LinkedIn posts\n\n### 2. LinkedIn Profile Batch Scraper\n- **Tool**: [LinkedIn Profile Details Batch Scraper (No Cookies Required)](https://apify.com/apimaestro/linkedin-profile-batch-scraper-no-cookies-required)\n- **Pricing**: $5.00 per 1,000 results\n- **Function**: Enriches scraped profiles with detailed information\n\n> 💡 **Free Tier**: Apify provides 1,000 free scraped comments to get you started!\n\n---\n",
+        "height": 1000,
+        "width": 1620,
+        "color": 5
+      },
+      "id": "a0627ba9-e030-417d-a5aa-739e30a5d6c2",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1060,
+        -920
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "formTitle": "Linkedin Posts Comments Leads Scraper",
+        "formDescription": "=<div style=\"font-family: Arial, sans-serif; line-height: 1.8; color: #333; word-wrap: break-word; overflow-wrap: break-word;\">\n\n<p style=\"margin-bottom: 20px;\"><strong style=\"color: #0077b5;\">🔸 Step 1: Add Posts URLs</strong></p>\n<p style=\"margin-bottom: 20px;\">The workflow accepts various LinkedIn post identifier formats:</p>\n\n<p style=\"margin-bottom: 18px;\"><strong>📊 Numeric post IDs:</strong><br>\n<span style=\"font-family: monospace; background: #f5f5f5; padding: 4px 6px; word-break: break-all; margin-top: 8px; display: inline-block;\">7334385757769416704</span></p>\n\n<p style=\"margin-bottom: 18px;\"><strong>🔗 Activity URLs:</strong><br>\n<span style=\"font-family: monospace; background: #f5f5f5; padding: 4px 6px; word-break: break-all; display: block; margin-top: 8px;\">https://www.linkedin.com/feed/update/urn:li:activity:273437/</span></p>\n\n<p style=\"margin-bottom: 25px;\"><strong>🌐 Full post URLs:</strong><br>\n<span style=\"font-family: monospace; background: #f5f5f5; padding: 4px 6px; word-break: break-all; display: block; margin-top: 8px;\">https://www.linkedin.com/posts/username_title-activity-7334385757769416704-dMnz</span></p>\n\n<hr style=\"margin: 30px 0; border: 1px solid #ddd;\">-------------------\n\n<p style=\"margin-bottom: 20px;\"><strong style=\"color: #28a745;\">✅ Step 2: Results</strong></p>\n<p style=\"margin-bottom: 20px;\">Once finished, you'll be redirected to Google Sheets where you can find your result with the name:</p>\n<p style=\"background: #f0f8ff; padding: 15px; border-left: 4px solid #0077b5; margin: 20px 0;\">\n<strong>\"LinkedIn-Posts-Comments-Leads-{{ $now.format('yyyy-MM-dd') }}\"</strong>\n</p>\n\n<hr style=\"margin: 30px 0; border: 1px solid #ddd;\">-------------------\n\n\n<p style=\"color: #666; font-size: 14px; margin-top: 25px;\"><em>💡 Tip: Make sure your LinkedIn URLs are publicly accessible for the best results.</em></p>\n\n</div>",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Post IDs/URLs",
+              "fieldType": "textarea",
+              "placeholder": "e.g. 7334385757769416704, https://www.linkedin.com/feed/update/urn:li:activity:7334385757769416704/",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "How many comments you want to scrape?",
+              "fieldType": "number",
+              "placeholder": "Default: 100"
+            }
+          ]
+        },
+        "responseMode": "lastNode",
+        "options": {
+          "appendAttribution": false,
+          "buttonLabel": "Submit",
+          "respondWithOptions": {
+            "values": {
+              "respondWith": "redirect",
+              "redirectUrl": "=https://docs.google.com/spreadsheets/u/0/"
+            }
+          },
+          "ignoreBots": true
+        }
+      },
+      "id": "00f486ba-ce6c-4965-a9fc-d97002b8517b",
+      "name": "On form submission",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        -140,
+        600
+      ],
+      "webhookId": "a81d04b5-169a-4368-b925-91fb0660b6b2",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20febbcc-0a59-4a89-8932-9bbb34b0e9f9",
+              "name": "APIFY_TOKEN",
+              "type": "string",
+              "value": ""
+            },
+            {
+              "id": "291758a3-c73f-4db5-a2b3-5f88664a8b53",
+              "name": "limit",
+              "type": "number",
+              "value": "={{ $json.limit }}"
+            },
+            {
+              "id": "921b72d5-3688-4324-9d36-50668548344e",
+              "name": "postIds",
+              "type": "array",
+              "value": "={{ $json.postIds }}"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "45ee91cc-4868-4d0a-b94c-7f90add26707",
+      "name": "Set APIFY Token",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        380,
+        300
+      ],
+      "notesInFlow": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## 1. Set APIFY TOKEN\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### _(CLICK ME)_",
+        "height": 300,
+        "width": 260,
+        "color": 3
+      },
+      "id": "484e6e84-8ec1-4e2d-ac00-896e23bfd71e",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        300,
+        200
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "_(or if run manually ENABLE this)_  \n### 4. Set Post ID/URL\n\n\n\n\n\n\n\n\n\n\n\n\n\n### _(CLICK ME)_ and Connect\n",
+        "height": 300,
+        "color": 2
+      },
+      "id": "b58c0456-7b76-409b-a385-afeebec1a7f9",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -20,
+        120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 3. You can run through the form (check Form URL)\n\n\n\n\n\n\n\n\n\n\n\n\n\n### _(CLICK ME)_ \nIf run manually DISABLE this node",
+        "height": 380,
+        "width": 400,
+        "color": 3
+      },
+      "id": "965f70a0-b10c-41f4-9981-eb84859ed748",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -280,
+        460
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "916bb8f7-34c5-4f2f-b13d-f60d228abc1f",
+              "name": "postIds",
+              "type": "array",
+              "value": "={{ $json['Post IDs/URLs'].replaceAll('\\n','').replaceAll('\\r', '').split(',').filter(item => $ifEmpty(item, false))  }}"
+            },
+            {
+              "id": "7ff3d2f4-ab8a-444f-9747-f95166a950bd",
+              "name": "limit",
+              "type": "number",
+              "value": "={{ $json['How many comments you want to scrape?'] || 100 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7cd57885-b9ed-4f17-a16b-88555dde0d8a",
+      "name": "Set fields from the form",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        180,
+        600
+      ],
+      "notesInFlow": true,
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af09ad86-b3dd-45b7-b17d-cb810e4b48d6",
+              "name": "postIds",
+              "type": "array",
+              "value": "['https://www.linkedin.com/feed/update/urn:li:activity:7334385757769416704/', 'https://www.linkedin.com/feed/update/urn:li:activity:7318557377971023872/']"
+            },
+            {
+              "id": "b2f9412e-4c81-454f-ad84-a1d5f6547a26",
+              "name": "limit",
+              "type": "number",
+              "value": 100
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5e6df2d-2cbf-4c8e-ae43-0b0b12f07971",
+      "name": "Set manual fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        40,
+        200
+      ],
+      "notesInFlow": true,
+      "typeVersion": 3.4,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "19224073-c84d-456f-b694-318df4223d2a",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.summary.totalComments }}",
+              "rightValue": 100
+            },
+            {
+              "id": "8156447e-75dd-4cad-8fc8-17366667d165",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $('Set APIFY Token').first().json.limit }}",
+              "rightValue": 100
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5c1b326-e815-43c1-89e0-b6f897d235d9",
+      "name": "More runs needed?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1180,
+        300
+      ],
+      "notesInFlow": true,
+      "typeVersion": 2.2,
+      "notes": "Per run it's only 100 comments"
+    },
+    {
+      "parameters": {
+        "jsCode": "const limitPages = Math.ceil($('Set APIFY Token').first().json.limit / 100)\nconst totalComments = $('Run Apify Comments Scraper').last().json.summary.totalComments \nconst availablePages = Math.ceil(totalComments / 100)\n\nconst totalRuns = availablePages <= limitPages ? availablePages : limitPages\n\nlet currentPage = 2\n\n\nreturn {\n  json: {\n    items:\n      Array.from({ length: totalRuns }, (_, i) => {\n        return { currentPage: currentPage + i }\n      })\n  }\n};"
+      },
+      "id": "c3395110-dfe1-4715-88d8-6e174e7c23b2",
+      "name": "Set pagination",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1400,
+        160
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "3926a0de-f08d-426b-b183-e04f488e0a41",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1620,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "id": "1f3b5bcb-0e8e-49d9-9780-97ed5436570b",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        960,
+        300
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4280f11-a50b-4065-8742-9f994c6ee84d",
+              "name": "items",
+              "type": "array",
+              "value": "={{ $json.items.concat($('Aggregate').item.json.items) }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9e3f82d2-32f8-4d9a-b0e4-4371152b5968",
+      "name": "Gather All Comments",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        2280,
+        -40
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all input items\nconst items = $input.first().json.items;\n\n// Use reduce to filter unique profile_url values\nconst uniqueProfiles = items.reduce((acc, item) => {\n  // Check if this profile_url is already in the accumulator\n  console.log(item)\n  if (item.author && !acc.some(i => i.profile_url === item.author.profile_url)) {\n    acc.push(item.author);\n  }\n  return acc;\n}, []);\n\nreturn uniqueProfiles"
+      },
+      "id": "0f0fc9a2-aee7-4f06-a383-ebddf40dc3e0",
+      "name": "Create Unique List of Leads",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2740,
+        320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## 🛠 Running Apify LinkedIn Comments Scrapers and processing data\nWe want to run an Apify scraper once to validate the number of available comments and then run it multiple times if necessary.",
+        "height": 840,
+        "width": 2040,
+        "color": 7
+      },
+      "id": "fe78df14-358d-4f7a-8af0-0fe95b8423bb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        560,
+        -120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Create a unique list of Leads, ✨ enrich ✨ it with more data\nOnce we have all of the comment authors, we need to enrich them with more information from LinkedIn\n",
+        "height": 840,
+        "width": 1700
+      },
+      "id": "5fd93bcc-88fa-497c-a34e-97f1c4006cb3",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2600,
+        -120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.apify.com/v2/acts/apimaestro~linkedin-post-comments-replies-engagements-scraper-no-cookies/run-sync-get-dataset-items?token=' +$json.APIFY_TOKEN}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "postIds",
+              "value": "={{ $json.postIds }}"
+            },
+            {
+              "name": "page_number",
+              "value": "={{ 1 }}"
+            },
+            {
+              "name": "sortOrder",
+              "value": "most recent"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $json.limit }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5bc5a73b-6802-4ba0-aed0-07314f4b44f2",
+      "name": "Run Apify Comments Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        740,
+        300
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.apify.com/v2/acts/apimaestro~linkedin-post-comments-replies-engagements-scraper-no-cookies/run-sync-get-dataset-items?token=' + $('Set APIFY Token').first().json.APIFY_TOKEN}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "postIds",
+              "value": "={{ $('Set APIFY Token').first().json.postIds }}"
+            },
+            {
+              "name": "page_number",
+              "value": "={{ $json.currentPage }}"
+            },
+            {
+              "name": "sortOrder",
+              "value": "most recent"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $('Set APIFY Token').first().json.limit }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0a26aa38-50e4-4471-bdec-c9f8ce887056",
+      "name": "Run Apify Comments Scraper Loop",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2060,
+        180
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.apify.com/v2/acts/apimaestro~linkedin-profile-batch-scraper-no-cookies-required/run-sync-get-dataset-items?token=' + $('Set APIFY Token').first().json.APIFY_TOKEN}}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "usernames",
+              "value": "={{ $json.batches }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "48a7afb3-ad40-439d-ad17-85817d397ff6",
+      "name": "Run Apify Profile Enrichment",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        3780,
+        340
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "batches",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "id": "ef6f51b8-ce2d-4833-ad8d-eb945825ca00",
+      "name": "Split Out Batches",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        3200,
+        320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "edd7aebb-54da-4c82-b4e1-b748ac8502c5",
+      "name": "Loop Over Comments",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1840,
+        160
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "51466329-d051-4df4-aa69-34646392e351",
+      "name": "Loop Over Profiles",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        3500,
+        320
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "const uniqueProfiles = $input.all().map(item => item.json.profile_url)\n\n// Split the uniqueProfiles in batches of 500 for the Apify\nconst chunkSize = 500;\nconst batches = [];\n\nfor (let i = 0; i < uniqueProfiles.length; i += chunkSize) {\n  batches.push(uniqueProfiles.slice(i, i + chunkSize));\n}\n\n\nreturn { batches };"
+      },
+      "id": "2bce1d0c-5dd4-468b-8789-5cb72bb35be5",
+      "name": "Split in batches",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2960,
+        320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "id": "0154a843-2200-449f-ba72-1ff241b9a429",
+      "name": "Aggregate Comments",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2340,
+        180
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "items",
+        "options": {}
+      },
+      "id": "3fa8a2de-d33a-4bb1-81e7-93c369cd49a2",
+      "name": "Aggregate Profiles",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        4000,
+        340
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "items"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "id": "c891ac9d-b703-4aa6-8aca-91157a970c44",
+      "name": "Aggregate All Profiles",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        3780,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "items"
+            }
+          ]
+        },
+        "options": {
+          "mergeLists": true
+        }
+      },
+      "id": "d9cea39a-0133-42eb-9b8c-20a14620af59",
+      "name": "Aggregate All Comments",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        2060,
+        -40
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": true
+        }
+      },
+      "id": "3ce8221b-9e7c-429d-a158-9018e05bec6c",
+      "name": "Convert to File",
+      "type": "n8n-nodes-base.convertToFile",
+      "position": [
+        4660,
+        -20
+      ],
+      "executeOnce": true,
+      "typeVersion": 1.1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## You can either run it manually (not through form) and download the CSV\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nYou need to activate \"Trigger manual\" nodes first\n\n### _(CLICK ME) and Connect_",
+        "height": 380,
+        "width": 660,
+        "color": 2
+      },
+      "id": "ec781ada-b9a7-453a-94c6-db1702f44305",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4400,
+        -120
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 2. Add credentials to Google Sheets\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### _(CLICK ME)_",
+        "height": 380,
+        "width": 660,
+        "color": 3
+      },
+      "id": "4739fe1b-05cc-436c-9a70-4204c142b57d",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4400,
+        340
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "function flatten(obj, prefix = '', res = {}) {\n  for (const key in obj) {\n    const value = obj[key];\n    const prefixedKey = prefix ? `${prefix}_${key}` : key;\n    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {\n      flatten(value, prefixedKey, res);\n    } else {\n      res[prefixedKey] = value;\n    }\n  }\n  return res;\n}\n\nreturn $input.first().json.items.map(item => ({\n  json: flatten(item)\n}));"
+      },
+      "id": "84aa6d64-2a03-4f4e-9b86-b5a5f5e798f2",
+      "name": "Prepare the list for export",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4000,
+        160
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "=LinkedIn-Posts-Comments-Leads-{{ $now.format('yyyy-MM-dd+T') }}",
+        "sheetsUi": {
+          "sheetValues": [
+            {
+              "title": "Leads"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "97fc0db5-e79d-4cd5-a488-c07dd96a5e27",
+      "name": "Create Google Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        4480,
+        480
+      ],
+      "executeOnce": true,
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Google Sheet').first().json.spreadsheetId }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Create Google Sheet').first().json.sheets[0].properties.sheetId }}"
+        },
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "profileUrl",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "profileUrl",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_fullname",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_fullname",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_first_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_first_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_last_name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_last_name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_headline",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_headline",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_public_identifier",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_public_identifier",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_profile_picture_url",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_profile_picture_url",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_about",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_about",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_location_country",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_location_country",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_location_city",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_location_city",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_location_full",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_location_full",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_location_country_code",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_location_country_code",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_creator_hashtags",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_creator_hashtags",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_is_creator",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_is_creator",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_is_influencer",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_is_influencer",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_is_premium",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_is_premium",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_created_timestamp",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_created_timestamp",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_show_follower_count",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_show_follower_count",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_background_picture_url",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_background_picture_url",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_urn",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_urn",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_follower_count",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_follower_count",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_connection_count",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_connection_count",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_current_company",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_current_company",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_current_company_urn",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_current_company_urn",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "basic_info_current_company_url",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "basic_info_current_company_url",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "experience",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "experience",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "education",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "education",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "certifications",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "certifications",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "USER_ENTERED",
+          "useAppend": true
+        }
+      },
+      "id": "387a629c-71bb-45cf-9dbd-5532318e6d5e",
+      "name": "Add Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        4900,
+        480
+      ],
+      "executeOnce": false,
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn $('Prepare the list for export').all();"
+      },
+      "id": "709444ef-a28a-4aa8-84ec-5c0dc580fcaf",
+      "name": "Set the list for sheets",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        4700,
+        480
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "\n---\n\n## 📊 Output Data Structure\n\nYour exported data will include:\n\n- **Basic Info**: Name, headline, location\n- **Profile Details**: Company, position, industry\n- **Engagement Data**: Comment content, engagement metrics\n- **Contact Info**: Available profile links and connections\n- **Enriched Data**: Additional profile insights from Apify\n\n",
+        "height": 280,
+        "width": 1180,
+        "color": 5
+      },
+      "id": "5bca0ba6-c153-480c-8711-e0b34c1ea064",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1060,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "---\n\n## 💡 Pro Tips\n\n- **Quality over Quantity**: Target posts with high-quality, relevant engagement\n- **Monitor Costs**: Track your Apify usage to stay within budget\n- **Data Hygiene**: Regularly clean and deduplicate your lead lists\n- **Compliance**: Ensure your scraping activities comply with LinkedIn's terms of service\n\n---\n\n## 🆘 Troubleshooting\n\n**Common Issues:**\n- **Authentication Errors**: Verify your Apify token is correctly configured\n- **Empty Results**: Check that your LinkedIn post URLs are valid and public\n- **Export Failures**: Ensure Google Sheets credentials are properly set up\n\n**Need Help?** Contact [Saverflow.ai](https://saverflow.ai) for support and custom workflow development.\n\n---\n\n*Powered by Saverflow.ai | Streamline your lead generation with intelligent automation*",
+        "height": 540,
+        "width": 760
+      },
+      "id": "9095c28f-b965-4463-8218-da724eb4601c",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        120,
+        1040
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "\n## 📋 Prerequisites\n\n### Required API Credentials\n\n1. **Apify Token**\n   - Add your `APIFY_TOKEN` to the workflow credentials\n   - [Get your token from Apify Console](https://apify.com/account#/integrations)\n\n2. **Google Sheets Credentials** *(if using Sheets export)*\n   - Configure OAuth credentials for Google Sheets integration\n   - [Follow n8n's Google Sheets setup guide](https://docs.n8n.io/integrations/builtin/credentials/google/oauth-single-service/?utm_source=n8n_app&utm_medium=credential_settings&utm_campaign=create_new_credentials_modal)\n\n---\n\n## 🔄 Workflow Process\n\n### Default Mode: Form-Based Execution\n\n1. **Manual Trigger** → Launches the workflow\n2. **Form Submission** → User-friendly form for inputting LinkedIn post URLs\n3. **Comment Scraping** → Apify extracts all comments from specified posts\n4. **Profile Enrichment** → Additional profile data gathered for each commenter\n5. **Data Processing** → Creates unique, enriched lead list\n6. **Google Sheets Export** → Automatically populates your spreadsheet\n\n**Result**: You'll be redirected to a Google Sheets document containing all enriched leads\n\n### Alternative Mode: CSV Export\n\nFor users preferring CSV output:\n\n1. **Disable**: Form trigger nodes\n2. **Enable**: Manual trigger node\n3. **Disable**: Google Sheets export nodes\n4. **Enable**: CSV download nodes\n5. **Configure**: Add post IDs/URLs in \"Set manual fields\" node\n6. **Execute**: Run workflow and download CSV from the CSV node\n",
+        "height": 960,
+        "width": 1620,
+        "color": 6
+      },
+      "id": "69803f96-94bf-4711-b1f2-0f6a7f669d37",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1060,
+        80
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "48ba49e4-1ed4-4ee0-9c37-a818e554bdad",
+      "name": "Done",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        5620,
+        200
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Add Leads": {
+      "main": [
+        [
+          {
+            "node": "Done",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "More runs needed?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set pagination": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set APIFY Token": {
+      "main": [
+        [
+          {
+            "node": "Run Apify Comments Scraper",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split in batches": {
+      "main": [
+        [
+          {
+            "node": "Split Out Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger manually": {
+      "main": [
+        [
+          {
+            "node": "Set manual fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "More runs needed?": {
+      "main": [
+        [
+          {
+            "node": "Set pagination",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Unique List of Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Batches": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Comments": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Profiles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Comments": {
+      "main": [
+        [
+          {
+            "node": "Aggregate All Comments",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Apify Comments Scraper Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Profiles": {
+      "main": [
+        [
+          {
+            "node": "Aggregate All Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Run Apify Profile Enrichment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Set fields from the form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Set the list for sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gather All Comments": {
+      "main": [
+        [
+          {
+            "node": "Create Unique List of Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Comments": {
+      "main": [
+        [
+          {
+            "node": "Gather All Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate All Profiles": {
+      "main": [
+        [
+          {
+            "node": "Prepare the list for export",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set the list for sheets": {
+      "main": [
+        [
+          {
+            "node": "Add Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set fields from the form": {
+      "main": [
+        [
+          {
+            "node": "Set APIFY Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Apify Comments Scraper": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Unique List of Leads": {
+      "main": [
+        [
+          {
+            "node": "Split in batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare the list for export": {
+      "main": [
+        [
+          {
+            "node": "Create Google Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Apify Profile Enrichment": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Profiles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Apify Comments Scraper Loop": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "01a48256-0f75-48a0-b69b-b384e14783df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0fb75cf7fe95e3dad8680101bdc45549409c0f747d9491461d65b61bd6537e9"
+  },
+  "id": "A0Ms11UZBi3MwyoA",
+  "tags": []
+}

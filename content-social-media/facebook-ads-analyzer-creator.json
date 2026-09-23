@@ -1,0 +1,2526 @@
+{
+  "name": "Facebook Ads Analyzer & Creator - Shared",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        160
+      ],
+      "id": "0b05083f-2a5e-477b-8f04-27cd9f30f186",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d768cc21-03d3-4362-8063-d613a7e030d7",
+              "name": "Ad Account ID",
+              "value": "YOUR AD ACCOUNT ID HERE",
+              "type": "string"
+            },
+            {
+              "id": "83830154-57f1-4913-b65e-674b2927a242",
+              "name": "date_preset",
+              "value": "={{ $prevNode.name.toLowerCase().includes('weekly') ? 'last_7d' : 'yesterday' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        440
+      ],
+      "id": "9c625840-130d-4381-8ca6-3e994937b51d",
+      "name": "Set Fields"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $('Split Out Campaigns').item.json.data.id }}",
+        "edge": "=ads",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "name,insights"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        280,
+        440
+      ],
+      "id": "b476e47c-9f7f-43f5-8e99-e44e797f4b2b",
+      "name": "Get Campaigns Ads",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $json.creative.id }}",
+        "options": {
+          "queryParametersJson": "{\n  \"thumbnail_width\": \"1080\",\n  \"thumbnail_height\": \"1080\",\n  \"fields\": \"asset_feed_spec,thumbnail_url\"\n}"
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2620,
+        440
+      ],
+      "id": "829ee88e-e3e3-4937-9ffc-aa1c23861802",
+      "name": "Get Content",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $('Filter Empty Items').item.json.data[0].ad_id }}",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "fields",
+                "value": "id,name,creative"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        440
+      ],
+      "id": "5ff08399-c3ab-4e2f-be9c-5c64bde7bc7d",
+      "name": "Get Creative ID",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "61d99eaa-fff9-4fd5-a8b5-92069b43b8af",
+              "name": "Campaign Name",
+              "value": "={{ $('Add Campaign name').item.json.Campaign }}",
+              "type": "string"
+            },
+            {
+              "id": "47241850-5644-4ae2-964d-90bc89583bd4",
+              "name": "Campaign_ID",
+              "value": "={{ $('Get Insights').item.json.data[0].campaign_id }}",
+              "type": "string"
+            },
+            {
+              "id": "62f93ee2-61cb-4805-9353-b249a45972c9",
+              "name": "Campaign Objective",
+              "value": "={{ $('Split Out Campaigns').item.json.data.objective }}",
+              "type": "string"
+            },
+            {
+              "id": "da761774-2d5b-4dd8-87fa-df0725e987c0",
+              "name": "Ad_Name",
+              "value": "={{ $('Add Campaign name').item.json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "6f41cc50-46d3-4646-b9a2-914667633594",
+              "name": "Ad_ID",
+              "value": "={{ $('Get Insights').item.json.data[0].ad_id }}",
+              "type": "string"
+            },
+            {
+              "id": "c91c5eee-109b-4766-ad94-514af0a31346",
+              "name": "Media",
+              "value": "={{ $('Get Content').item.json.thumbnail_url }}",
+              "type": "string"
+            },
+            {
+              "id": "d533fcf5-64ac-435b-9fcc-4c77449d4470",
+              "name": "Content",
+              "value": "={{ \n  JSON.stringify([\n    {\n      \"Images\": $('Get Content').item.json.asset_feed_spec.images,\n      \"Bodies\": $('Get Content').item.json.asset_feed_spec.bodies,\n      \"Call To Action\": $('Get Content').item.json.asset_feed_spec.call_to_action_types,\n      \"Descriptions\": $('Get Content').item.json.asset_feed_spec.descriptions,\n      \"Link URLs\": $('Get Content').item.json.asset_feed_spec.link_urls,\n      \"Titles\": $('Get Content').item.json.asset_feed_spec.titles\n    }\n  ], (key, value) => key === 'adlabels' ? undefined : value, 2) \n}}\n",
+              "type": "array"
+            },
+            {
+              "id": "f5267138-d734-46bf-99f4-3e1c925d0665",
+              "name": "Insights",
+              "value": "={{ JSON.stringify($('Get Insights').item.json.data, null, 2) }}",
+              "type": "array"
+            },
+            {
+              "id": "186f1a10-ed4d-4774-9762-021e2becce1c",
+              "name": "Roas (Omni_Purchase)",
+              "value": "={{ $('Get ROAS').item.json.data[0].purchase_roas[0].value }}",
+              "type": "string"
+            },
+            {
+              "id": "708d70b6-49a5-4d0c-bb82-87596d690aa5",
+              "name": "Cost Per Action (CPA)",
+              "value": "={{ JSON.stringify($('Get Cost Per action').item.json.data) }}",
+              "type": "string"
+            },
+            {
+              "id": "b1791b65-a4b4-40cf-b499-b56e15c3f641",
+              "name": "Total sales",
+              "value": "={{ JSON.stringify($('Get Actions Values').item.json.data.map(item => ({ ...item, action_values: item.action_values.filter(av => av.action_type === \"offsite_conversion.fb_pixel_purchase\") }))) }}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3520,
+        580
+      ],
+      "id": "f34c2eae-880e-464a-9b1a-e75a77cd3444",
+      "name": "Collect Relevant Data"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7a450175-9b8a-404a-842a-0f2796406455",
+              "name": "Campaign",
+              "value": "={{ $('Split Out Campaigns').item.json.data.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        440
+      ],
+      "id": "0b7d32e1-40fc-4a3e-a1d6-2505c5f45dbe",
+      "name": "Add Campaign name"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $json.data[0].ad_id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "actions"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        440
+      ],
+      "id": "5eadf9f3-1e15-49c5-b0a4-f5270c60f2d9",
+      "name": "Get Actions",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "419293d0-7211-40ff-bf0d-488b145b2dd7",
+              "name": "Actions",
+              "value": "={{ $('Get Actions').item.json.data[0].actions }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3200,
+        260
+      ],
+      "id": "12a350dc-b5ab-4569-9580-0278bff6af70",
+      "name": "Set Actions"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "Actions",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        3400,
+        260
+      ],
+      "id": "6d540567-8a1c-45aa-b600-25dd0ea9543d",
+      "name": "Split Out2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "52b226ef-b1ca-4628-8bcc-de0f5adebde5",
+              "leftValue": "={{ $json.action_type }}",
+              "rightValue": "omni_purchase",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        3620,
+        260
+      ],
+      "id": "84df7f46-852b-442d-8cb3-c764a8aa8f34",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98e33dd5-88f2-4cae-b131-f1b92a6f1e2f",
+              "name": "Purchase",
+              "value": "={{ $json.value }}",
+              "type": "string"
+            },
+            {
+              "id": "131c25da-af26-4605-afb2-0ed3608901fd",
+              "name": "Ad ID Purchase",
+              "value": "={{ $('Get Insights').item.json.data[0].ad_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3840,
+        260
+      ],
+      "id": "d0383268-13e4-48fb-86f2-9898cd1a6349",
+      "name": "Set Purchase"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "Ad ID Purchase",
+              "field2": "Ad_ID"
+            }
+          ]
+        },
+        "joinMode": "enrichInput2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        4180,
+        420
+      ],
+      "id": "6a3b83d1-3e3c-4bd2-ab8a-02d694c29250",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "imageUrls": "={{ $json.Media }}",
+        "options": {
+          "detail": "low"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        4420,
+        420
+      ],
+      "id": "2fee2fe3-e071-4a89-a606-9673aed74612",
+      "name": "Get Image Description",
+      "executeOnce": false,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "175be6cc-d67f-4865-92ab-ad03b2972a90",
+              "name": "Whole Input",
+              "value": "=- Campaign Name: {{ $('Merge').item.json['Campaign Name'] }}\n\n- Campaign ID: {{ $('Merge').item.json.Campaign_ID }}\n\n- Campaign Ojective: {{ $('Merge').item.json['Campaign Objective'] }}\n\n- Ad Name: {{ $('Merge').item.json.Ad_Name }}\n\n- Ad ID: {{ $('Merge').item.json.Ad_ID }}\n\n- Ad Media Description: {{ $('Get Image Description').item.json.content }}\n\n- Ad Content:\n{{ JSON.stringify($('Merge').item.json.Content, (key, value) => key === 'Images' ? undefined : value, 2) }}\n\n- Metrics:\nSpend: {{ $('Merge').item.json.Insights[0].spend }}\nCPM:{{ $('Merge').item.json.Insights[0].cpm }}\nCPC:{{ $('Merge').item.json.Insights[0].cpc }}\nCTR:{{ $('Merge').item.json.Insights[0].ctr }}\nRoas (Omni Purchase): {{ $('Merge').item.json['Roas (Omni_Purchase)'] }}\nPurchase: {{ $('Merge').item.json.Purchase }}\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4660,
+        420
+      ],
+      "id": "13e13c9c-3617-437e-98c3-afe5b9862c94",
+      "name": "Set Input"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "Whole Input",
+              "renameField": true,
+              "outputFieldName": "Aggregated Input"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        4840,
+        420
+      ],
+      "id": "38af26a8-b468-406d-bea2-23dd136bbbb2",
+      "name": "Aggregate Input"
+    },
+    {
+      "parameters": {
+        "content": "## Perplexity",
+        "height": 260,
+        "width": 840,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7060,
+        1420
+      ],
+      "id": "e2394273-1c18-481b-8476-45f3918a30da",
+      "name": "Sticky Note18"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        7180,
+        1480
+      ],
+      "id": "0d3ecdcd-6f25-4153-bb66-88f1b362f9f2",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar-deep-research\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Be precise and concise.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $json.query }}\"\n    }\n  ]\n}",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7440,
+        1480
+      ],
+      "id": "3b34a19a-9d2e-49c1-aa45-4ab89c3bb1f5",
+      "name": "Perplexity API"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "587e537d-ff0e-45ce-93fc-abd9954ff241",
+              "name": "Response",
+              "value": "=Content\n{{ $json.choices[0].message.content}}\n\nCitations:\n{{ $json.citations }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7680,
+        1480
+      ],
+      "id": "50e11af0-53d3-455c-b94f-084eee289dba",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "content": "### Trigger every Monday 10 am",
+        "height": 260,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        340
+      ],
+      "id": "6b80784e-736f-4909-bbd8-2205c191a83a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "### Set:\n- Ad Account\n- Date Preset",
+        "height": 260,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        340
+      ],
+      "id": "af15616e-f8d7-4168-b330-ea719ee3e3ba",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "### Get Campaigns",
+        "height": 260,
+        "width": 480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        340
+      ],
+      "id": "ab79a974-bd95-4f2e-a0a6-81b782100677",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "### Get Ads",
+        "height": 260,
+        "width": 700,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        200,
+        340
+      ],
+      "id": "6c12c894-d1a4-4451-8907-f8b5dac2fccc",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "### Get Ads Metrics",
+        "height": 260,
+        "width": 1780,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        340
+      ],
+      "id": "71445cd8-5bbd-4b3a-8d1e-6f4fe86530bd",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "### Get Purchase Count",
+        "height": 240,
+        "width": 920,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3120,
+        200
+      ],
+      "id": "43a6a869-bedb-46e5-a234-0d84032aefdd",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 260,
+        "width": 260,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4340,
+        360
+      ],
+      "id": "0ca12527-85a9-4a7d-bb45-ba53982646b0",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "## Performance Analyzer",
+        "height": 480,
+        "width": 1000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5900,
+        1060
+      ],
+      "id": "9fab08bf-1cd7-4330-9e16-f29cae37b85e",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "## Send Output",
+        "height": 320,
+        "width": 340,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9580,
+        240
+      ],
+      "id": "a18bae59-6916-4230-aa86-6b9d9ed4d3db",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "",
+        "height": 960,
+        "width": 7160,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1460,
+        40
+      ],
+      "id": "2a25e71a-eb4a-40e4-a021-f55f8ef9fe62",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "## Deep Research",
+        "height": 840,
+        "width": 1000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6960,
+        900
+      ],
+      "id": "60a8ee5e-a0c5-4dcb-8154-57b8b07f98fd",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "## New Add Creation",
+        "height": 480,
+        "width": 1000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8020,
+        1080
+      ],
+      "id": "c2856405-3001-4ac7-9b12-d1ff8cebeb66",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7020,
+        560
+      ],
+      "id": "d8bc66da-a53e-4433-ad4a-95458742b4d5",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the Group Leader Agent. Your role is to consolidate and integrate outputs from your team of specialized agents into one final comprehensive Markdown report in the Slack Block Kit format. Use the following HTTP Request tools as part of your process:\n\n- **Get_Data:** Use this tool to retrieve the aggregated input data from Google Docs. IMPORTANT: Use this documment id as input: {{ $('Update Temp file').item.json.documentId }}\n- **Performance_Analyzer:** Use this tool to retrieve a consolidated summary of the campaign’s performance data, including key metrics such as ROAS, CTR, CPA, Purchases, Spend, , etc.\n- **Deep_Research:** Use this tool to obtain in-depth behavioral insights via the Perplexity_Tool. The output should include detailed trigger events, core desires, and psychological framing, with proper source citations.\n- **New_Ad_Creator_Agent:** Use this tool to obtain creative ad suggestions, including three complete new ad copy drafts, additional hook/headline variations for video ads or UGC, and a creative direction note with recommendations on tone, mood, format, visuals, and a hook line.\n- **Pinecone_Vector_ Store:** Use this tool to get ...\n\nImportant: After receiving the top ads from the Performance Analyzer, you must verify that the top three ads are indeed the highest performing based on the input data from the Google Docs document (using the provided document ID {Leader_DocumentID}). If the top three ads reported by the Performance Analyzer do not match the top three according to the input data (for example, if any ad is out of order or misidentified), immediately correct and reorder them using the data from the document, also if there's missing data add it accordingly. Do not hallucinate or fabricate any values—use only the exact numbers provided in the Google Docs document. Confirm and proceed only when the top three ads are accurately identified and ordered by ROAS (in descending order) as per the input data.\n\nImportant 2: When sending instructions to your specialized agents, always include the document ID (referenced as {Leader_DocumentID}). This ensures all agents use the same data source.\n\n\nAdditionally, ensure that:\n- **Sorting:** Sort the ads by ROAS in descending order so that the ad with the highest ROAS appears first in the \"Top Performing Ads\" section.\n- **Numerical Formatting:** All numeric KPIs (ROAS, CTR, CPA, Spend) should be formatted consistently to two decimal places.\n- **Calculation Validation:** Use the Calculator tool for any derived metrics (such as Purchase ROAS, Total Sales, CPA) and tag them as *calculated*.\n- **Data Integrity:** Before finalizing the output, ensure that every Ad ID exactly matches the corresponding Ad ID in the input data. Double-check for any discrepancies, misassignments, or swaps, and correct them immediately.\n- Use the current date on the repot: {{ new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}\nYour final output must strictly adhere to the following Slack Block Kit JSON structure (do not include any opening or closing messages outside the block structure):\n\n-----------------------------------------------------------\n{\n  \"blocks\": [\n    {\n      \"type\": \"header\",\n      \"text\": {\n        \"type\": \"plain_text\",\n        \"text\": \"Creative Insights Drop – {{ new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) }}\n\",\n        \"emoji\": true\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Top Performing Ads → Behavioral Insights → New Ad Concepts*\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*🔥 Top Performing Ads*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"1️⃣ *Ad ID:* [Ad ID from Performance_Analyzer]\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> \n◦ *Format:* [Ad Format from Performance_Analyzer]\\n\n◦ *Headline:* [Ad Headline from Performance_Analyzer]\\n\n◦ *Body Copy:* [Ad Body Copy from Performance_Analyzer]\\n\n*ROAS:* [ROAS] | *CTR:* [CTR]% | *CPA:* $[CPA] | *Purchases:* [Purchases] | *Spend:* $[Spend]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"2️⃣ *Ad ID:* [Second Ad ID from Performance_Analyzer]\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> \n◦ *Format:* [Ad Format from Performance_Analyzer]\\n\n◦ *Headline:* [Ad Headline from Performance_Analyzer]\\n\n◦ *Body Copy:* [Ad Body Copy from Performance_Analyzer]\\n\n*ROAS:* [ROAS] | *CTR:* [CTR]% | *CPA:* $[CPA] | *Purchases:* [Purchases] | *Spend:* $[Spend]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"3️⃣ *Ad ID:* [Third Ad ID from Performance_Analyzer]\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> \n◦ *Format:* [Ad Format from Performance_Analyzer]\\n\n◦ *Headline:* [Ad Headline from Performance_Analyzer]\\n\n◦ *Body Copy:* [Ad Body Copy from Performance_Analyzer]\\n\n*ROAS:* [ROAS] | *CTR:* [CTR]% | *CPA:* $[CPA] | *Purchases:* [Purchases] | *Spend:* $[Spend]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*🧠 What’s Working Across These Ads:*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> • *Message:* [Summary or key message from Performance_Analyzer]\\n• *Voice:* [Voice insights, e.g., _Calm, grounded, real-world tone_]\\n• *Social Proof:* [Insights on social proof, e.g., _studies, purchase volume shown subtly_]\\n• *Hooks:* [Insights on hooks, e.g., _scroll-stoppers rooted in skepticism + rediscovery_]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*🧠 Behavioral Insights (GPT + Perplexity Research)*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Trigger Events:*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> • [Detailed trigger event 1]\\n• [Detailed trigger event 2]\\n• [Detailed trigger event 3]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Core Desires:*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> • [Detailed core desire 1]\\n• [Detailed core desire 2]\\n• [Detailed core desire 3]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*Psychological Framing That Converts:*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> • [Insight 1 regarding framing, e.g., quiet social proof]\\n• [Insight 2 regarding framing, e.g., emotional time delay]\\n• [Insight 3 regarding framing, e.g., personal ownership language]\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*✍️ 3 New Ad Copy + Headline Combos to Test*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"✅ *Variation 1*\\n*Headline:* Variation 1 Headline from New_Ad_Creator_Agent\\n*Body Copy:* Variation 1 Body Copy from New_Ad_Creator_Agent\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"✅ *Variation 2*\\n*Headline:* Variation 2 Headline from New_Ad_Creator_Agent\\n*Body Copy:* Variation 2 Body Copy from New_Ad_Creator_Agent\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"✅ *Variation 3*\\n*Headline:* Variation 3 Headline from New_Ad_Creator_Agent\\n*Body Copy:* Variation 3 Body Copy from New_Ad_Creator_Agent\"\n      }\n    },\n    {\n      \"type\": \"divider\"\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \"*🎯 Today’s Creative Tasks*\"\n      }\n    },\n    {\n      \"type\": \"section\",\n      \"text\": {\n        \"type\": \"mrkdwn\",\n        \"text\": \">>> - Write UGC scripts for Variations [X] & [Y]\\n- Build 1 new static creative using Variation [X] (headline overlay + image concept)\\n- Recut top-performing demo video with expert VO and Variation [X] messaging\\n- Drafts due in #creative-review by [Deadline]\"\n      }\n    }\n  ]\n}\n-----------------------------------------------------------\n\nEnsure that:\n- If any required data is missing, mark it as undefined or 0 as appropriate.\n- The final output contains no extraneous content and strictly adheres to the above structure.\n- Each HTTP Request tool call corresponds to a specialized agent within your team.\n- Always include the document ID provided by the Group Leader (referenced as {Leader_DocumentID}) in your queries to the Get_Data tool.\n- Double-check that every Ad ID exactly matches the corresponding Ad ID from the input data, and order the ads by ROAS in descending order.\n  \nGenerate the final Markdown report accordingly.\n",
+        "options": {
+          "systemMessage": "You are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        7360,
+        340
+      ],
+      "id": "1c8968b8-9f98-44f4-be20-d15c90695045",
+      "name": "Head",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "196e1ab5-8be9-45b3-9a04-d599eae8d4d3",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        6040,
+        1180
+      ],
+      "id": "bc85dcb6-3b71-470d-b49f-c29a18b6be13",
+      "name": "Webhook",
+      "webhookId": "196e1ab5-8be9-45b3-9a04-d599eae8d4d3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        6600,
+        1180
+      ],
+      "id": "6dd24845-8d40-40a8-9941-b1f2330bfd5d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Leader Agent Message:\n{{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "=You are the Performance Analyzer Agent. Your task is to extract, consolidate, and analyze all campaign performance data retrieved via the **Get_Data** tool. **Note:**The Group Leader Agent will send you the document ID in an initial message, which you must use to retrieve the aggregated input data from Google Docs. Use the provided document ID (referenced as {Leader_DocumentID}) with the Get_Data tool.\n\nThe input data includes:\n\n- **Campaign Information:** Campaign Name, Campaign ID, Campaign Objective.\n- **Ad Information:** Ad Name, Ad ID, and the full ad copy (including the headline from Titles, body copy from Bodies, call to action, description, and any link URLs available).\n- **Performance Metrics:** Spend, CPM, CPC, CTR, ROAS, CPA, Total Sales, and the number of Purchases.\n- **Additional Context:** Any ad media description provided.\n\nYou must:\n- **Calculate Purchase ROAS using the Calculator tool** if it is not explicitly provided (e.g., compute Purchase ROAS as Purchase Revenue / Spend, and tag it as *calculated*).\n- **Calculate Total Sales** as the product of Spend and ROAS (when ROAS is available), and tag it as *calculated*.\n- **Calculate CPA (Cost Per Acquisition)** as Spend divided by the number of Purchases (if Purchases > 0), and tag it as *calculated*.\n- Use the Calculator tool to perform any additional necessary computations if certain metrics are missing but can be derived from existing data.\n\nYour output should be a concise, structured summary that highlights:\n- The top-performing ads based on key KPIs (ROAS, CPA, Total Sales, and Purchases).\n- A detailed breakdown of metrics for each ad.\n- Any trends, anomalies, or notable observations in ad performance.\n\nIf any required metric is missing, mark it as “undefined” or 0 as appropriate. Do not add any additional data beyond what is provided. Format your output in a clear, structured manner so that the Group Leader Agent can later integrate it into the final Markdown report.  \n "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        6260,
+        1180
+      ],
+      "id": "1dc1802b-cedd-429e-9da7-546ddb73b521",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6220,
+        1380
+      ],
+      "id": "74b6d7a3-f1f4-4570-a81c-1e3eaadb9819",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        6460,
+        1380
+      ],
+      "id": "f530d533-218b-4b1e-89c0-70e8946fddb1",
+      "name": "Calculator1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "7f8083f7-27c9-48b9-9ee9-2e896eff0f5d",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        7140,
+        1020
+      ],
+      "id": "c8904775-bb97-4db6-92af-53daf4ec37a6",
+      "name": "Webhook1",
+      "webhookId": "7f8083f7-27c9-48b9-9ee9-2e896eff0f5d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        7700,
+        1020
+      ],
+      "id": "071db9fb-5788-4b4b-8c06-f1428db04d61",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Leader Agent Message:\n{{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "=You are the Deep Research Agent. Your task is to conduct comprehensive avatar and audience research for the brand [INSERT BRAND NAME] to uncover deep insights that will inform ad copywriting. This research should focus on understanding the audience's motivations, fears, desires, language patterns, pain points, objections, beliefs, and common themes across a variety of sources. The goal is to combine these findings with patterns from the brand’s existing high-performing ad copy.\n\nUse the following research sources:\n- Customer reviews (from the brand’s own site, Amazon, and competitors)\n- Reddit threads, forums, Quora, YouTube comments\n- The brand's existing high-performing ad copy and comments\n- Influencer testimonials or UGC content, if available\n- Testimonials from competing or similar brands\n\nYour output must include the following sections:\n\n1. **Audience Avatars**\n   - Identify 2–4 main customer personas (give them names).\n   - For each persona, include:\n     - Demographics, psychographics, and buying motivations.\n     - Key objections and emotional triggers.\n     - Preferred content style and language.\n\n2. **Emotional Landscape**\n   - Identify the core desires and emotions the product speaks to.\n   - Note the underlying fears or frustrations.\n   - Describe the transformation the customer seeks.\n\n3. **Jobs-to-be-Done Analysis**\n   - Define the “job” the customer is hiring the product to do.\n   - Outline the functional, emotional, and social dimensions of that job.\n\n4. **Voice of Customer (VOC) Analysis**\n   - List the most common phrases used by customers (direct quotes if available).\n   - Identify repeated words or themes in top reviews and ad comments.\n   - Highlight phrases that signal desire, pain, satisfaction, or unmet expectations.\n\n5. **Objections & Barriers to Purchase**\n   - Describe any hesitations or concerns that prospects have.\n   - Identify any misconceptions that need to be addressed.\n\n6. **Competitive Intelligence**\n   - Note the messages that are resonating for competitors.\n   - Identify any gaps in their positioning or communication.\n\n7. **Ad Copy Pattern Analysis**\n   - Analyze the brand’s existing best-performing ads:\n     - What hook types work best (e.g., emotional, benefit-driven, curiosity)?\n     - What angles, formats, or narratives keep recurring?\n     - Identify recurring phrases or structures across top ads.\n\n8. **Messaging Opportunities**\n   - Based on the above, suggest untapped or underleveraged messages, themes, or angles to test next.\n   - Highlight gaps or inconsistencies in current messaging that could be optimized.\n\n**Note:** You do not have direct access to the document ID. The Group Leader Agent will send you the document ID in an initial message. Use the provided document ID (referenced as {Leader_DocumentID}) with the Get_Data tool if necessary to retrieve any aggregated input data from Google Docs that could inform your research.\n\nUse detailed, specific, and actionable language in your research output. Ensure that each insight is supported by citations (include source names or article titles). Be precise and concise in your responses.\n\nGenerate the comprehensive research findings accordingly.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        7360,
+        1020
+      ],
+      "id": "1996c549-776c-41fc-99a5-579d5e67074f",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7320,
+        1220
+      ],
+      "id": "c2a20434-c013-4233-9056-104787bbec18",
+      "name": "OpenAI Chat Model4",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "Perplexity_Tool",
+        "description": "Call this tool to perform a real-time web search using the Perplexity API. The input should be a string containing the question or keywords you want to search for.",
+        "workflowId": {
+          "__rl": true,
+          "value": "mCFULQgrsZMQfA9Y",
+          "mode": "list",
+          "cachedResultName": "Facebook Ads Analyzer & Creator"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2,
+      "position": [
+        7600,
+        1220
+      ],
+      "id": "dd246509-4850-4f85-b5b7-fe27693e8e2c",
+      "name": "Perplexity Tool1"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "490356ac-060f-44da-b18c-af00cdb6ab6d",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        8180,
+        1200
+      ],
+      "id": "05bd4672-cbd7-42b2-a5f4-38073270155e",
+      "name": "Webhook2",
+      "webhookId": "490356ac-060f-44da-b18c-af00cdb6ab6d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        8780,
+        1200
+      ],
+      "id": "2d5a8440-e4f9-4e7f-a98b-71f66c63a70a",
+      "name": "Respond to Webhook2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Leader Agent Message:\n{{ JSON.stringify($json.body) }}",
+        "options": {
+          "systemMessage": "You are the New Ad Creator Agent. Your task is to generate new creative ad suggestions using the performance summary from the Performance Analyzer and the behavioral insights from the Deep Research Agent as inputs. Your responsibilities include:\n\n1. Produce three complete new ad copy drafts. Each draft must include:\n   - A compelling headline (new hook) that resonates with the target audience.\n   - Body copy that leverages insights from the performance data and deep research, incorporating emotional angles or \"aha moments.\"\n\n2. Generate two additional hook/headline variations specifically suited for video ads or UGC content.\n\n3. Create one creative direction note that includes:\n   - Recommendations on tone, mood, and style (e.g., which format to use: UGC testimonial, founder voiceover, etc.).\n   - Suggestions for visuals (e.g., lighting, framing, imagery) that align with the target audience.\n   - A proposed hook line.\n\n**Important:** You do not have direct access to the document ID. The Group Leader Agent will provide you with the document ID (referenced as {Leader_DocumentID}) if necessary to retrieve any aggregated input data from Google Docs using the Get_Data tool. Ensure that your creative proposals are based solely on the consolidated performance and research insights provided.\n\nYour output should be structured and formatted clearly so that the Group Leader Agent can integrate it into the final Markdown report without any extraneous content.\n\nGenerate the new ad creative proposals accordingly.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        8400,
+        1200
+      ],
+      "id": "d0aa8743-154e-485c-bce5-b0f0449b8af1",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        8360,
+        1400
+      ],
+      "id": "8e9d492e-7047-4ab7-bc25-bf7f82790fbf",
+      "name": "OpenAI Chat Model5",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Multi Agent System",
+        "height": 1780,
+        "width": 3340,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5800,
+        40
+      ],
+      "id": "034306d6-9b2b-4f4b-9f27-2be1256b16d3",
+      "name": "Sticky Note13"
+    },
+    {
+      "parameters": {
+        "content": "## Leader Agent",
+        "height": 740,
+        "width": 1220,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6820,
+        100
+      ],
+      "id": "7ee2feb4-87d4-4c48-8eee-c398824df4c1",
+      "name": "Sticky Note14"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to send all campaign performance data—including campaign details, ad information, performance metrics, and additional context—to the Performance Analyzer Agent. It extracts and consolidates key metrics (such as ROAS, CTR, Spend) and returns a structured summary of the campaign’s performance.",
+        "method": "POST",
+        "url": "https://rsmedia.app.n8n.cloud/webhook/Performance Analyzer Agent",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "Message To Performance Analyzer"
+            },
+            {
+              "name": "Document ID",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Update Temp file').item.json.documentId }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        7240,
+        560
+      ],
+      "id": "8e19d866-4cdf-4f5d-bf5f-8984f64c3f11",
+      "name": "Performance Analyzer2"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to forward detailed queries to the Deep Research Agent. It leverages the Perplexity_Tool to gather in-depth insights from public sources (e.g., Reddit threads, Amazon reviews, TikTok comments, DTC marketing studies). The tool retrieves precise information on consumer behavior, emotional triggers, and market trends, along with proper source citations.",
+        "method": "POST",
+        "url": "https://rsmedia.app.n8n.cloud/webhook/Deep Research",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "Message To Deep Research Agent"
+            },
+            {
+              "name": "Document ID",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Update Temp file').item.json.documentId }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        7440,
+        560
+      ],
+      "id": "14f4c2ad-ee6c-4eb0-9246-2fb95a522d0b",
+      "name": "Deep Research"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to send the consolidated performance data and research insights to the New Ad Creator Agent. This agent uses the input to generate creative ad suggestions—including three complete new ad copy drafts, additional hook/headline variations for video ads or UGC, and a creative direction note with recommendations on tone, format, mood, and visuals.",
+        "method": "POST",
+        "url": "https://rsmedia.app.n8n.cloud/webhook/New Ad Creator Agent",
+        "sendBody": true,
+        "parametersBody": {
+          "values": [
+            {
+              "name": "Message To the New Ad Creator"
+            },
+            {
+              "name": "Document ID",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Update Temp file').item.json.documentId }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        7600,
+        560
+      ],
+      "id": "c1d5510f-a492-45fb-b09d-53f0d5662c12",
+      "name": "New Ad Creator Agent"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $('Get Insights').item.json.data[0].ad_id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "ad_id, action_values"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        440
+      ],
+      "id": "063e9c3f-a055-4200-8d37-b299f04586d9",
+      "name": "Get Actions Values",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $('Get Insights').item.json.data[0].ad_id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "ad_id, cost_per_action_type"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        440
+      ],
+      "id": "ef399089-d8de-459d-9fa2-3510d45d5037",
+      "name": "Get Cost Per action",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $json.id }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "=Data:\n{{ $('Aggregate Input').item.json['Aggregated Input'] }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        5240,
+        420
+      ],
+      "id": "ab59134d-89df-40c2-a7aa-204112c7b51d",
+      "name": "Update Temp file",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "96W0sfyNfDAUcz6x",
+          "name": "Main Google Connect"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "13uhKDbKTtlGOdR-e1rA-nadYkA9hafjmO9BggXfh8Xo\t"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        5140,
+        600
+      ],
+      "id": "db284b6a-ffa5-4707-964f-5483b0c5349f",
+      "name": "Google Docs1",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "96W0sfyNfDAUcz6x",
+          "name": "Main Google Connect"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to access to the document where the data is stored, use the given Document ID",
+        "operation": "get",
+        "documentURL": "={{ $fromAI('Documment_ID') }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        7460,
+        860
+      ],
+      "id": "d5635880-42a8-4198-b4f4-fb1956a84d14",
+      "name": "Get Data",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "96W0sfyNfDAUcz6x",
+          "name": "Main Google Connect"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ \"https://graph.facebook.com/v22.0/act_\" + $json[\"Ad Account ID\"] + \"/campaigns\" }}\n",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "facebookGraphApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "name, objective"
+            },
+            {
+              "name": "date_preset ",
+              "value": "={{ $json.date_preset }}"
+            },
+            {
+              "name": "effective_status",
+              "value": "[\"ACTIVE\"]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -260,
+        440
+      ],
+      "id": "8545c6e0-89be-4cbe-b412-7a4059f22ab8",
+      "name": "Get Active Campaigns",
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "IhEtZJgR8surR5lk",
+          "mode": "list",
+          "cachedResultName": "Error Message Workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        10200,
+        720
+      ],
+      "id": "70396c49-085f-4d4e-8ec8-fb5cdf9f9f17",
+      "name": "Execute Error Workflow"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "C08MF1MRU7K",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "messageType": "block",
+        "blocksUi": "={{ $('Head').item.json.output.replaceAll(\"```\", \"\").replace(\"json\", \"\") }}",
+        "text": "=",
+        "otherOptions": {
+          "includeLinkToWorkflow": false,
+          "mrkdwn": true
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [
+        9700,
+        340
+      ],
+      "id": "0b8ebcd9-4a3a-4be7-8eb6-446c2e308344",
+      "name": "Send Output Slack",
+      "webhookId": "b9da3f17-b456-4144-a13e-c6de2117a244",
+      "executeOnce": true,
+      "credentials": {
+        "slackApi": {
+          "id": "KvnIMKpo8I7ik2aE",
+          "name": "Slack API (Access token)"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d5ac93fe-aeb8-4b8d-b1b9-ffe8d41aa3ea",
+              "name": "Today date",
+              "value": "={{new Date()}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5460,
+        420
+      ],
+      "id": "0f710c74-2114-4b38-94dd-d1453d505d28",
+      "name": "Set Date"
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "=13SQQWDDzn-3wsMnj_j9wm_A-ErsBOBEFSrIoHe-69yQ",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        5280,
+        220
+      ],
+      "id": "eaa62631-a800-4685-ada6-f732c7537b19",
+      "name": "Manual Delete",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "3HRyFezyUO02HZFV",
+          "name": "Drive Connect Main"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "### Trigger Day 10 am",
+        "height": 260,
+        "width": 260,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1280,
+        640
+      ],
+      "id": "4e579cd7-186a-47ca-87c7-f70cc284f1c6",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10 * * 1"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        440
+      ],
+      "id": "606b505c-dbaf-47e8-afd7-af9bd4a0e25d",
+      "name": "Weekly Trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 0 10 * * *"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1200,
+        740
+      ],
+      "id": "d0f1ef1d-7bb5-47aa-9b0b-ffa89ac5254e",
+      "name": "Daily Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "company_knowledge_database",
+        "toolDescription": "use this tool to get",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "facebook-ads-analyzer-creator",
+          "mode": "list",
+          "cachedResultName": "facebook-ads-analyzer-creator"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        7740,
+        560
+      ],
+      "id": "c077078d-a028-4fd2-a4a4-5db7a8ee791e",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "wrrJJHNxDa8o2LY1",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        7880,
+        660
+      ],
+      "id": "3a1fbc07-a323-4a2c-9f7d-178130945b35",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "oh0Z4G6r5neaRiER",
+          "name": "John"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Triggers",
+        "height": 840,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1380,
+        100
+      ],
+      "id": "c55f6dd5-e476-4e40-8897-0d6b38b82c1b",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "## Set Data",
+        "height": 840,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        100
+      ],
+      "id": "f18db6f3-39ec-4923-93e9-77a500ebe0f2",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## Get Data From facebook",
+        "height": 440,
+        "width": 3400
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        240
+      ],
+      "id": "b8f81aa3-989f-496d-9753-3390b9d5a0b5",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $json.id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "ad_name,ad_id,campaign_name,campaign_id,spend,conversions,cost_per_conversion,cpm,cpc,ctr"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        440
+      ],
+      "id": "58ff8622-0505-453e-917e-1dbe12279f4f",
+      "name": "Get Insights",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        440
+      ],
+      "id": "c9134f65-1699-4daa-985b-bd2042211e7c",
+      "name": "Split Out Campaigns"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        500,
+        440
+      ],
+      "id": "7926105a-f79f-475e-bbdf-deb64c935a74",
+      "name": "Split Out Ads"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b5615afa-a436-4692-804e-9dff5c9a9ce0",
+              "leftValue": "={{ $json.data }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1300,
+        440
+      ],
+      "id": "915abc2e-bfbd-4bac-8906-8ba7e9ec599a",
+      "name": "Filter Empty Items"
+    },
+    {
+      "parameters": {
+        "graphApiVersion": "v21.0",
+        "node": "={{ $('Filter Empty Items').item.json.data[0].ad_id }}",
+        "edge": "insights",
+        "options": {
+          "queryParameters": {
+            "parameter": [
+              {
+                "name": "date_preset",
+                "value": "={{ $('Set Fields').item.json.date_preset }}"
+              },
+              {
+                "name": "fields",
+                "value": "purchase_roas"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        440
+      ],
+      "id": "771e0d3e-53a1-44dc-a765-2bac97d2553f",
+      "name": "Get ROAS",
+      "executeOnce": false,
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "qi4ojP6zXjCyCFXL",
+          "name": "Facebook Graph account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Prepare Data",
+        "height": 680,
+        "width": 2560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3060,
+        140
+      ],
+      "id": "e6366d3b-1321-421b-adda-2e8254d67d16",
+      "name": "Sticky Note19"
+    },
+    {
+      "parameters": {
+        "content": "### Collect Data",
+        "height": 260,
+        "width": 280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        500
+      ],
+      "id": "6e36de71-9c7a-4207-b4e9-6e5a882b34d6",
+      "name": "Sticky Note20"
+    },
+    {
+      "parameters": {
+        "content": "### Save Data Temporarily",
+        "height": 240,
+        "width": 400,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4980,
+        360
+      ],
+      "id": "f4112ead-f7d9-4ddf-9740-8231d4da1d73",
+      "name": "Sticky Note21"
+    },
+    {
+      "parameters": {
+        "folderId": "default",
+        "title": "=Temp Document"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        5020,
+        420
+      ],
+      "id": "64e4741e-e832-4b08-abe6-84d13b92b17b",
+      "name": "Create Temp File",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "96W0sfyNfDAUcz6x",
+          "name": "Main Google Connect"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "=13uhKDbKTtlGOdR-e1rA-nadYkA9hafjmO9BggXfh8Xo",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        9320,
+        340
+      ],
+      "id": "11e5b5ba-e9e1-4497-be41-e2bcdf167bf4",
+      "name": "Delete Temp File",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "3HRyFezyUO02HZFV",
+          "name": "Drive Connect Main"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Final steps",
+        "height": 780,
+        "width": 1200
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        9220,
+        140
+      ],
+      "id": "b1d661fd-8338-4f0c-b40d-c0e227f3e348",
+      "name": "Sticky Note22"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "23b4ef36-b934-464f-af2f-c3a69444b306",
+              "leftValue": "={{ $runIndex }}",
+              "rightValue": 4,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9980,
+        700
+      ],
+      "id": "e2288204-e338-47f7-8b08-f62d50de38e0",
+      "name": "Count Executions"
+    }
+  ],
+  "pinData": {
+    "Weekly Trigger": [
+      {
+        "json": {
+          "name": "First item",
+          "code": 1
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Fields": {
+      "main": [
+        [
+          {
+            "node": "Get Active Campaigns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Campaigns Ads": {
+      "main": [
+        [
+          {
+            "node": "Split Out Ads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Creative ID": {
+      "main": [
+        [
+          {
+            "node": "Get Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Content": {
+      "main": [
+        [
+          {
+            "node": "Set Actions",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Collect Relevant Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Relevant Data": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Add Campaign name": {
+      "main": [
+        [
+          {
+            "node": "Get Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Actions": {
+      "main": [
+        [
+          {
+            "node": "Get Actions Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Actions": {
+      "main": [
+        [
+          {
+            "node": "Split Out2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out2": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Set Purchase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Purchase": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Get Image Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Description": {
+      "main": [
+        [
+          {
+            "node": "Set Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Input": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Input": {
+      "main": [
+        [
+          {
+            "node": "Create Temp File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Perplexity API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Tool1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Performance Analyzer2": {
+      "ai_tool": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deep Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Ad Creator Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Actions Values": {
+      "main": [
+        [
+          {
+            "node": "Get Cost Per action",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Cost Per action": {
+      "main": [
+        [
+          {
+            "node": "Get ROAS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Temp file": {
+      "main": [
+        [
+          {
+            "node": "Set Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Data": {
+      "ai_tool": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "AI Agent2",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Head": {
+      "main": [
+        [
+          {
+            "node": "Delete Temp File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Active Campaigns": {
+      "main": [
+        [
+          {
+            "node": "Split Out Campaigns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Output Slack": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Count Executions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Date": {
+      "main": [
+        [
+          {
+            "node": "Head",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Weekly Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Head",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Insights": {
+      "main": [
+        [
+          {
+            "node": "Filter Empty Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Campaigns": {
+      "main": [
+        [
+          {
+            "node": "Get Campaigns Ads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Ads": {
+      "main": [
+        [
+          {
+            "node": "Add Campaign name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Empty Items": {
+      "main": [
+        [
+          {
+            "node": "Get Actions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get ROAS": {
+      "main": [
+        [
+          {
+            "node": "Get Creative ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Temp File": {
+      "main": [
+        [
+          {
+            "node": "Update Temp file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Temp File": {
+      "main": [
+        [
+          {
+            "node": "Send Output Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Count Executions": {
+      "main": [
+        [
+          {
+            "node": "Head",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Execute Error Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "IhEtZJgR8surR5lk"
+  },
+  "versionId": "9b70a542-a7f5-4408-9757-a02dc0eb0249",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e0f3afdfa8cdf759f3628c3983ef08ff7c153a90839a4c34ddd866854a12653a"
+  },
+  "id": "Xz7dDet5CErE9SSo",
+  "tags": []
+}

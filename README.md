@@ -58,7 +58,7 @@ n8n-ai-automation-templates/
 Built and maintained by **Jayesh Mahawer** — Software Engineer, building AI automation tools & digital products.
 
 - 🌐 Website: [jayeshmahawer.com](https://jayeshmahawer.com)
-- 📸 Instagram: [@digijack_](https://instagram.com/jaye5h54)
+- 📸 Instagram: [@jaye5h54](https://instagram.com/jaye5h54)
 - 💻 GitHub: [@jayeshmahawer](https://github.com/jayeshmahawer)
 
 If these workflows save you time, drop a ⭐ on the repo!
